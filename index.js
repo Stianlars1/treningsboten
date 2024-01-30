@@ -34,9 +34,9 @@ const {
   SLACK_BOT_TOKEN,
 } = config; // npr appen skal kjøre på SPB1U
 // const slackClient = new WebClient(SLACK_BOT_TOKEN);
-const slackClient = new WebClient(SLACK_BOT_TOKEN_SPB1);
+const slackClient = new WebClient(SLACK_BOT_TOKEN);
 // const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
-const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET_SPB1);
+const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
 // const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID_PRIVAT; // vår kanal === C066A54U848
 const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID; // vår kanal === C066A54U848
 
