@@ -1,0 +1,48 @@
+display_information:
+  name: Dagens Lunjs BETA
+  description: Im a robot that decides lunches
+  background_color: "#221c3e"
+features:
+  bot_user:
+    display_name: Dagens Lunjs BETA
+    always_online: false
+  slash_commands:
+    - command: /suggestion
+      url: https://www.dagens-lunsj.app/slack/commands
+      description: La meg velge matretten din!
+      should_escape: false
+    - command: /blockfood
+      url: https://www.dagens-lunsj.app/slack/commands
+      description: Blokkerer forslaget fra dagens lunsj
+      should_escape: false
+oauth_config:
+  scopes:
+    user:
+      - channels:read
+      - groups:read
+      - mpim:read
+    bot:
+      - app_mentions:read
+      - channels:history
+      - channels:read
+      - chat:write
+      - commands
+      - groups:history
+      - groups:read
+      - groups:write
+      - im:history
+      - incoming-webhook
+      - mpim:history
+      - reactions:read
+      - reactions:write
+      - users.profile:read
+settings:
+  event_subscriptions:
+    request_url: https://www.dagens-lunsj.app/slack/events
+    user_events:
+      - member_joined_channel
+    bot_events:
+      - app_mention
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false

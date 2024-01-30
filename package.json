@@ -1,0 +1,45 @@
+{
+  "name": "dagens-lunsj",
+  "version": "1.0.0",
+  "description": "A slack-bot app for choosing lunch-meal based on message-thread replies",
+  "main": ".",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Stianlars1/dagens-lunsj.git"
+  },
+  "keywords": [
+    "todays",
+    "lunch",
+    "dagens-lunsj",
+    "dagens",
+    "lunsj",
+    "NodeJS",
+    "Express",
+    "slack",
+    "botslack-app",
+    "slack-bot"
+  ],
+  "author": "Stian Larsen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Stianlars1/dagens-lunsj/issues"
+  },
+  "homepage": "https://github.com/Stianlars1/dagens-lunsj#readme",
+  "dependencies": {
+    "@slack/events-api": "^3.0.1",
+    "@slack/rtm-api": "^6.1.1",
+    "@slack/web-api": "^6.10.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
+    "node-cron": "^3.0.3",
+    "openai": "^4.19.1"
+  },
+  "type": "module"
+}
