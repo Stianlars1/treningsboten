@@ -63,7 +63,7 @@ process.on("unhandledRejection", (reason, promise) => {
 slackEvents.on("member_joined_channel", async (event) => {
   // Check if the member joined is the bot itself
   console.log("event: ", event);
-  const isBot = event.user === config.SLACK_BOT_USER_ID_SPB1;
+  const isBot = event.user === config.SLACK_BOT_TOKEN; // BYTTE TIL spb1
   if (isBot) {
     console.log("Bot joined channel: ", event.channel);
     try {
