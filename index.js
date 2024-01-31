@@ -37,8 +37,8 @@ const {
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 // const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
 const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
-// const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID_PRIVAT; // vår kanal === C066A54U848
-const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID; // vår kanal === C066A54U848
+// const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID_PRIVAT; // vår kanal ===
+const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID; // vår kanal ===
 
 // Schedule messages
 scheduleMessages(slackClient);
@@ -71,6 +71,7 @@ slackEvents.on("member_joined_channel", async (event) => {
       const activeChannels = getActiveChannels();
       console.log("activeChannels: ", activeChannels);
       if (!activeChannels.includes(event.channel)) {
+        console.log("adding channel to file:", event.channel);
         activeChannels.push(event.channel);
         fs.writeFileSync(activeChannelsFile, JSON.stringify(activeChannels));
       }
@@ -119,9 +120,6 @@ slackEvents.on("error", (error) => {
 
 // Slack app routes
 app.post("/slack-events", (req, res) => {
-  console.log("Request Body: ", req.body);
-  console.log("Request Headers: ", req.headers);
-
   if (req.body.type === "url_verification") {
     return res.send(req.body.challenge);
   }
@@ -151,7 +149,6 @@ app.get("/", (request, response) => {
           </body>
         </html>
       `;
-
     response.status(200).send(htmlContent);
   } catch (err) {
     console.error("Error: ", err);
