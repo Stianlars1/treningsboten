@@ -120,12 +120,26 @@ slackEvents.on("member_joined_channel", async (event) => {
   }
 });
 
+slackEvents.on("message.channels", async (event) => {
+  console.log("== message.channels ==", 1);
+});
+slackEvents.on("message.groups", async (event) => {
+  console.log("== message.groups ==", 2);
+});
+slackEvents.on("message.im", async (event) => {
+  console.log("== message.im ==", 3);
+});
+slackEvents.on("message.mpim", async (event) => {
+  console.log("== message.mpim ==", 4);
+});
+
 slackEvents.on("error", (error) => {
   console.log("Error: ", error);
 });
 
 // Slack app routes
 app.post("/slack-events", (req, res) => {
+  console.log("=== incoming events ===");
   if (req.body.type === "url_verification") {
     return res.send(req.body.challenge);
   }
