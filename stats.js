@@ -13,70 +13,56 @@ export const activeChannelsFile = path.join(
 
 export function updateStatsForThread(
   channelId,
-  threadTimestamp,
+  thread_ts,
   userId,
   repetitions
 ) {
-  const filePath = path.join(activeChannelsDir, `${channelId}.json`);
-  fs.readFile(filePath, (err, data) => {
-    console.log("filepath: ", filePath);
-    console.log("## running updateStatsForThread ##");
-    if (err) throw err;
+  const insightsPath = path.join(insightsDir, `${channelId}.json`);
+  const date = new Date(parseFloat(thread_ts) * 1000)
+    .toISOString()
+    .split("T")[0]; // Convert timestamp to date
 
-    const channelData = JSON.parse(data);
-    const date = Object.keys(channelData.threads).find(
-      (key) => channelData.threads[key] === threadTimestamp
-    );
+  // Check if the file exists
+  if (fs.existsSync(insightsPath)) {
+    // File exists, read and update it
+    fs.readFile(insightsPath, (err, data) => {
+      if (err) throw err;
 
-    if (date) {
-      const insightsPath = path.join(insightsDir, `${channelId}.json`);
-      // Check if the file exists
-      if (fs.existsSync(insightsPath)) {
-        // File exists, read and update it
-        fs.readFile(insightsPath, (err, data) => {
-          if (err) throw err;
+      const stats = JSON.parse(data);
 
-          const stats = JSON.parse(data);
-
-          if (!stats[date]) {
-            stats[date] = {};
-          }
-
-          if (!stats[date][userId]) {
-            stats[date][userId] = 0;
-          }
-
-          stats[date][userId] += repetitions;
-
-          fs.writeFile(insightsPath, JSON.stringify(stats, null, 2), (err) => {
-            if (err) throw err;
-            console.log("Stats updated for user", userId, "on", date);
-          });
-        });
-      } else {
-        // File does not exist, create it with the initial data
-        const initialStats = {
-          [date]: {
-            [userId]: repetitions,
-          },
-        };
-
-        fs.writeFile(
-          insightsPath,
-          JSON.stringify(initialStats, null, 2),
-          (err) => {
-            if (err) throw err;
-            console.log(
-              "Stats file created and updated for user",
-              userId,
-              "on",
-              date
-            );
-          }
-        );
+      if (!stats[date]) {
+        stats[date] = {};
       }
-    }
-  });
+
+      if (!stats[date][userId]) {
+        stats[date][userId] = 0;
+      }
+
+      stats[date][userId] += repetitions;
+
+      fs.writeFile(insightsPath, JSON.stringify(stats, null, 2), (err) => {
+        if (err) throw err;
+        console.log("Stats updated for user", userId, "on", date);
+      });
+    });
+  } else {
+    // File does not exist, create it with the initial data
+    const initialStats = {
+      [date]: {
+        [userId]: repetitions,
+      },
+    };
+
+    fs.writeFile(insightsPath, JSON.stringify(initialStats, null, 2), (err) => {
+      if (err) throw err;
+      console.log(
+        "Stats file created and updated for user",
+        userId,
+        "on",
+        date
+      );
+    });
+  }
 }
 
 export function updateStats(channelId, threadTimestamp, userId, repetitions) {
