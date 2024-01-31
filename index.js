@@ -120,17 +120,18 @@ slackEvents.on("member_joined_channel", async (event) => {
   }
 });
 
-slackEvents.on("message.channels", async (event) => {
-  console.log("== message.channels ==", 1);
-});
-slackEvents.on("message.groups", async (event) => {
+slackEvents.on("message", async (event) => {
+  console.log("== message received ==", event);
+  if (
+    event.type === "message" &&
+    event.thread_ts &&
+    event.thread_ts !== event.ts
+  ) {
+    console.log("Received a reply in a thread:");
+    // Add your logic here to handle the threaded reply
+  }
+  res.status(200).end();
   console.log("== message.groups ==", 2);
-});
-slackEvents.on("message.im", async (event) => {
-  console.log("== message.im ==", 3);
-});
-slackEvents.on("message.mpim", async (event) => {
-  console.log("== message.mpim ==", 4);
 });
 
 slackEvents.on("error", (error) => {
