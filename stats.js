@@ -17,8 +17,9 @@ export function updateStatsForThread(
   userId,
   repetitions
 ) {
-  const filePath = path.join(__dirname, "activeChannels", `${channelId}.json`);
+  const filePath = path.join(activeChannelsDir, `${channelId}.json`);
   fs.readFile(filePath, (err, data) => {
+    console.log("filepath: ", filePath);
     console.log("## running updateStatsForThread ##");
     if (err) throw err;
 
@@ -28,11 +29,7 @@ export function updateStatsForThread(
     );
 
     if (date) {
-      const insightsPath = path.join(
-        __dirname,
-        "insights",
-        `${channelId}.json`
-      );
+      const insightsPath = path.join(insightsDir, `${channelId}.json`);
       fs.readFile(insightsPath, (err, data) => {
         if (err) throw err;
         const stats = JSON.parse(data);
