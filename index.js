@@ -25,6 +25,7 @@ initializeDirectoriesAndFiles();
 // Express app configurations
 const app = express();
 const PORT_SERVER = 3000;
+console.log("config:", config);
 
 // slack confs
 const {
