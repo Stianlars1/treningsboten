@@ -291,7 +291,7 @@ async function processLunchReplies(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Schedule message sending every day at 10:00 AM
   cron.schedule(
-    "*/20 * * * * *",
+    "*/40 * * * * *",
     // `${0} ${10} * * 1-5`,
     async () => {
       try {

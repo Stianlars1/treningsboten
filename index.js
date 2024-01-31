@@ -11,7 +11,6 @@ import {
   activeChannelsFile,
   getActiveChannels,
   initializeDirectoriesAndFiles,
-  removeBotFromChannels,
   scheduleMessages,
   sendMessage,
 } from "./helpers.js";
@@ -47,7 +46,7 @@ const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID; // vår kanal ===
 scheduleMessages(slackClient);
 
 // Remove today's blocked food
-removeBotFromChannels(slackClient);
+//removeBotFromChannels(slackClient);
 
 // Express and Slack event configurations
 app.use(cors());
@@ -61,6 +60,20 @@ process.on("uncaughtException", (err) => {
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+slackEvents.on("message", async (event) => {
+  console.log("== message received ==", event);
+  if (
+    event.type === "message" &&
+    event.thread_ts &&
+    event.thread_ts !== event.ts
+  ) {
+    console.log("Received a reply in a thread:");
+    // Add your logic here to handle the threaded reply
+  }
+  res.status(200).end();
+  console.log("== message.groups ==", 2);
 });
 
 slackEvents.on("member_joined_channel", async (event) => {
@@ -118,20 +131,6 @@ slackEvents.on("member_joined_channel", async (event) => {
       );
     }
   }
-});
-
-slackEvents.on("message", async (event) => {
-  console.log("== message received ==", event);
-  if (
-    event.type === "message" &&
-    event.thread_ts &&
-    event.thread_ts !== event.ts
-  ) {
-    console.log("Received a reply in a thread:");
-    // Add your logic here to handle the threaded reply
-  }
-  res.status(200).end();
-  console.log("== message.groups ==", 2);
 });
 
 slackEvents.on("error", (error) => {
