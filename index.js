@@ -16,6 +16,8 @@ import {
   sendMessage,
 } from "./helpers.js";
 
+import { updateStatsForThread } from "./stats.js";
+
 import { config } from "./config.js";
 
 // initialize directories and files
@@ -127,6 +129,28 @@ app.post("/slack-events", (req, res) => {
   if (req.body.type === "url_verification") {
     return res.send(req.body.challenge);
   }
+
+  console.log("\n\nreq.body: ", req.body);
+  // Event listener for 'message.thread_broadcast'
+  try {
+    if (
+      req.body.event &&
+      req.body.event.type === "message" &&
+      req.body.event.thread_ts
+    ) {
+      console.log("\n\nBroadcast message received", req.body.event);
+      const { channel, thread_ts, user, text } = req.body.event;
+
+      // Retrieve the number of repetitions from the text, assuming it's an integer
+      const repetitions = parseInt(text, 10);
+      if (!isNaN(repetitions)) {
+        updateStatsForThread(channel, thread_ts, user, repetitions);
+      }
+    }
+  } catch (error) {
+    ConsoleLogError("Slack events | message.thread_broadcast", error);
+  }
+  res.sendStatus(200);
 });
 
 // Node.js app routes
