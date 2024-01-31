@@ -63,26 +63,29 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 slackEvents.on("message", async (event) => {
-  console.log("== message received ==", event);
+  /*  == Handle replies in conversation == */
   if (
     event.type === "message" &&
     event.thread_ts &&
     event.thread_ts !== event.ts
   ) {
     console.log("Received a reply in a thread:");
-    // Add your logic here to handle the threaded reply
+
+    const channelId = event.channel;
+    const userId = event.user;
+    const threadTimestamp = event.thread_ts;
+    const repetitions = parseInt(event.text, 10); // Extracting the number of repetitions from the message text
+
+    if (!isNaN(repetitions)) {
+      updateStatsForThread(channelId, threadTimestamp, userId, repetitions);
+    }
   }
-  res.status(200).end();
-  console.log("== message.groups ==", 2);
 });
 
 slackEvents.on("member_joined_channel", async (event) => {
   // Check if the member joined is the bot itself
-  console.log("event: ", event);
-  const isBot = event.user === config.SLACK_BOT_USER_ID; // bytt til SPB1
+  const isBot = event.user === config.SLACK_BOT_USER_ID; // todo: bytt til SPB1
   console.log("isBot: ", isBot);
-  console.log("event.user:  ", event.user);
-  console.log("slack bot user id:  ", config.SLACK_BOT_USER_ID);
   if (isBot) {
     console.log("Bot joined channel: ", event.channel);
     try {
