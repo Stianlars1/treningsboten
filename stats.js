@@ -1,16 +1,17 @@
 export function updateStatsForThread(
   channelId,
-  thread_ts,
+  threadTimestamp,
   userId,
   repetitions
 ) {
   const filePath = path.join(__dirname, "activeChannels", `${channelId}.json`);
   fs.readFile(filePath, (err, data) => {
+    console.log("## running updateStatsForThread ##");
     if (err) throw err;
 
     const channelData = JSON.parse(data);
     const date = Object.keys(channelData.threads).find(
-      (key) => channelData.threads[key] === thread_ts
+      (key) => channelData.threads[key] === threadTimestamp
     );
 
     if (date) {
@@ -39,5 +40,46 @@ export function updateStatsForThread(
         });
       });
     }
+  });
+}
+
+export function updateStats(channelId, threadTimestamp, userId, repetitions) {
+  const filePath = path.join(insightsDir, `${channelId}.json`);
+  const dateKey = new Date(parseFloat(threadTimestamp) * 1000)
+    .toISOString()
+    .split("T")[0]; // Convert timestamp to date
+
+  fs.readFile(filePath, (err, data) => {
+    if (err && err.code === "ENOENT") {
+      // File not found, creating a new one
+      var stats = {};
+      stats[dateKey] = {};
+      stats[dateKey][userId] = repetitions;
+    } else if (err) {
+      console.error("Error reading file:", err);
+      return;
+    } else {
+      // File exists, update the existing data
+      var stats = JSON.parse(data);
+
+      if (!stats[dateKey]) {
+        stats[dateKey] = {};
+      }
+
+      if (!stats[dateKey][userId]) {
+        stats[dateKey][userId] = 0;
+      }
+
+      stats[dateKey][userId] += repetitions;
+    }
+
+    // Write the updated data back to the file
+    fs.writeFile(filePath, JSON.stringify(stats, null, 2), (err) => {
+      if (err) {
+        console.error("Error writing file:", err);
+      } else {
+        console.log(`Stats updated for user ${userId} on ${dateKey}`);
+      }
+    });
   });
 }
