@@ -1,5 +1,15 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dataDir = path.join(__dirname, "data");
+export const activeChannelsDir = path.join(dataDir, "activeChannels");
+export const insightsDir = path.join(dataDir, "insights");
+export const activeChannelsFile = path.join(
+  activeChannelsDir,
+  "activeChannels.json"
+);
 
 export function updateStatsForThread(
   channelId,
