@@ -4,6 +4,7 @@ export const config = {
   // proivate channel for testing
   SLACK_SIGNIN_SECRET: process.env.SLACK_SIGNIN_SECRET,
   SLACK_BOT_TOKEN: process.env.SLACK_BOT_TOKEN,
+  SLACK_BOT_USER_ID: process.env.SLACK_BOT_USER_ID,
   SLACK_CHANNEL_ID_PRIVAT: process.env.SLACK_CHANNEL_ID_PRIVAT,
 
   // SB1 Official channel
