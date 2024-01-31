@@ -43,15 +43,31 @@ export function velgTilfeldigØvelse() {
   return treningsØvelser[Math.floor(Math.random() * treningsØvelser.length)];
 }
 
-export function saveTimestampToFile(channelId, timestamp) {
+function saveTimestampToFile(channelId, timestamp) {
+  const filePath = path.join(activeChannelsDir, `${channelId}.json`);
+  const date = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+
   try {
-    const filePath = path.join(activeChannelsDir, `${channelId}.json`);
-    fs.writeFileSync(
-      filePath,
-      JSON.stringify({ lastMessageTimestamp: timestamp })
-    );
+    // Read the existing data if the file exists or start with an empty object
+    let channelData = {};
+    if (fs.existsSync(filePath)) {
+      channelData = JSON.parse(fs.readFileSync(filePath));
+    }
+
+    // If 'threads' key does not exist, initialize it
+    if (!channelData.threads) {
+      channelData.threads = {};
+    }
+
+    // Add or update the thread timestamp for the current date
+    channelData.threads[date] = timestamp;
+
+    // Write the updated data back to the file
+    fs.writeFileSync(filePath, JSON.stringify(channelData, null, 2)); // null, 2 for pretty-print format
+
+    console.log(`Timestamp saved for channel ${channelId} on ${date}`);
   } catch (error) {
-    ConsoleLogError("saveTimestampToFile", error);
+    console.error("Error in saveTimestampToFile:", error);
   }
 }
 
