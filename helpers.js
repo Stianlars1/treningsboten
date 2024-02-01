@@ -4,6 +4,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getNoonStatsMessage } from "./stats.js";
 import { treningsØvelser } from "./treningsØvelser.js";
+const moment = require("moment-timezone");
+
+process.env.TZ = "Europe/Oslo";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "data");
@@ -91,12 +94,13 @@ export function loadTimestampFromFile(channelId) {
 async function getDailyExerciseMessage(channelId) {
   const trainingExercise = velgTilfeldigØvelse(); // Existing random exercise selection
 
-  // Calculate "yesterday" using the native JavaScript Date object
-  const today = new Date();
-  console.log("today: ", today.toISOString().split("T")[0]);
-  const yesterdayDate = new Date(today.setDate(today.getDate() - 1))
-    .toISOString()
-    .split("T")[0];
+  // Use moment-timezone to get "today" and "yesterday" in Norwegian time zone
+  const today = moment.tz("Europe/Oslo").format("YYYY-MM-DD");
+  console.log("today: ", today);
+  const yesterdayDate = moment
+    .tz("Europe/Oslo")
+    .subtract(1, "days")
+    .format("YYYY-MM-DD");
   console.log("yesterday: ", yesterdayDate);
 
   const filePath = path.join(insightsDir, `${channelId}.json`);
@@ -425,11 +429,11 @@ export function calculateAndUpdateWinners() {
     );
     console.log("activeChannels: ", activeChannels);
 
-    // Assuming you want to keep using the date-fns library for date manipulation
-    // If not, you'll need to replace the following line with the native JavaScript date manipulation as before
-    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1))
-      .toISOString()
-      .split("T")[0];
+    // Use moment-timezone to get 'yesterday' in the Oslo timezone
+    const yesterday = moment
+      .tz("Europe/Oslo")
+      .subtract(1, "days")
+      .format("YYYY-MM-DD");
     console.log("yesterday: ", yesterday);
 
     activeChannels.forEach((channelId) => {
