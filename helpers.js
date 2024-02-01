@@ -202,7 +202,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${25} ${15} * * 1-5`,
+    `${33} ${15} * * 1-5`,
     async () => {
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
@@ -416,23 +416,32 @@ export async function removeChannel(channelId) {
   });
 }
 
-function calculateAndUpdateWinners() {
+export function calculateAndUpdateWinners() {
+  console.log("====  calculateAndUpdateWinners  ====");
   const activeChannels = JSON.parse(
     fs.readFileSync(path.join(activeChannelsFile, "utf8"))
   );
+  console.log("activeChannels: ", activeChannels);
   const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
-
+  console.log("yesterday: ", yesterday);
   activeChannels.forEach((channelId) => {
     const filePath = path.join(insightsDir, `${channelId}.json`);
+    console.log("filePath: ", filePath);
     if (fs.existsSync(filePath)) {
+      console.log("file exists");
       const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      console.log("data: ", data);
       if (data[yesterday]) {
+        console.log("data[yesterday]: ", data[yesterday]);
         const dayData = data[yesterday];
         const winner = Object.keys(dayData).reduce((acc, userId) => {
           return !acc || dayData[userId] > dayData[acc] ? userId : acc;
         }, null);
+        console.log("winner: ", winner);
         if (winner) {
           data[yesterday].winner = { [winner]: dayData[winner] };
+
+          console.log("dayData: ", dayData[winner]);
           fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
         }
       }
