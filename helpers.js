@@ -236,80 +236,11 @@ async function sendExcerciseMessage(slackClient, channelId) {
 // send stats message at noon
 async function sendNoonMessage(slackClient, channelId) {
   //  <@${event.user}> to tag the user
-  console.log("\n\nSending noon message to channel: ", channelId);
   try {
     const noonStatsMessage = await getNoonStatsMessage(channelId);
-    console.log("\nnoon message: ", noonStatsMessage);
-
     const result = await sendMessage(slackClient, channelId, noonStatsMessage);
-    if (result) {
-      console.log("Noon message sent successfully for channel: ", channelId);
-    } else {
-      console.log(
-        "Message not sent for channel: ",
-        channelId,
-        " with result: ",
-        result
-      );
-    }
   } catch (error) {
     ConsoleLogError("sendLunchMessage", error, channelId);
-  }
-}
-
-async function processLunchReplies(slackClient, channelId) {
-  // Your existing logic for processing lunch replies
-  const lastMessageTimestamp = loadTimestampFromFile(channelId);
-  const blockedFoods = getBlockedFoodsForToday(channelId);
-  console.log(
-    "Today's blocked foods: ",
-    blockedFoods,
-    " for channel: ",
-    channelId
-  );
-
-  if (!lastMessageTimestamp) {
-    console.log(
-      "No message timestamp available for today's lunch question\nThere seems to be a problem with the lastMessageTimestamp...."
-    );
-    return;
-  }
-
-  try {
-    const replies = await slackClient.conversations.replies({
-      channel: channelId,
-      ts: lastMessageTimestamp,
-    });
-
-    const lunchSuggestions = replies.messages
-      .filter((msg) => msg.ts !== lastMessageTimestamp) // Make sure the lunch suggestion is not the question itself
-      .filter((msg) => !isFoodBlocked(msg.text, channelId))
-      .map((msg) => msg.text);
-    console.log("forslag: \n", lunchSuggestions);
-    if (lunchSuggestions.length > 0) {
-      const winnerSuggestion =
-        lunchSuggestions[Math.floor(Math.random() * lunchSuggestions.length)];
-
-      const svarMelding = await velgTilfeldigLunsjSvar(
-        channelId,
-        winnerSuggestion
-      );
-
-      await sendMessage(slackClient, channelId, svarMelding);
-      await addChannelInsight(channelId, lunchSuggestions, winnerSuggestion);
-    } else {
-      const noRepliesMessage =
-        "Ingen forslag mottatt. :disappointed: Vi prøver igjen i morgen!";
-      console.log("No suggestions received.");
-      await sendMessage(slackClient, channelId, noRepliesMessage);
-    }
-  } catch (error) {
-    ConsoleLogError(
-      "processLunchReplies second level",
-      error,
-      " for channel: ",
-      channelId
-    );
   }
 }
 
@@ -523,4 +454,38 @@ async function addChannelInsight(channelId, lunchSuggestions, winner) {
   } catch (error) {
     ConsoleLogError("addChannelInsight", error);
   }
+}
+
+export async function removeChannel(channelId) {
+  console.log("TRYING TO REMOVE CHANNEL: ", channelId);
+  fs.readFile(activeChannelsFile, "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading activeChannels.json:", err);
+      return;
+    }
+
+    let channels = JSON.parse(data);
+    const channelIndex = channels.indexOf(channelId);
+
+    // If the channel is found, remove it
+    if (channelIndex > -1) {
+      channels.splice(channelIndex, 1);
+
+      // Write the updated channels back to the file
+      fs.writeFile(
+        activeChannelsFile,
+        JSON.stringify(channels, null, 2),
+        "utf8",
+        (writeErr) => {
+          if (writeErr) {
+            console.error("Error writing to activeChannels.json:", writeErr);
+          } else {
+            console.log(
+              `Channel ${channelId} removed from activeChannels.json`
+            );
+          }
+        }
+      );
+    }
+  });
 }

@@ -127,7 +127,7 @@ export async function getNoonStatsMessage(channelId) {
         return "Ingen statistikk tilgjengelig for i dag. Fortsett det gode arbeidet! 🚀";
       }
 
-      let message = "Statistikk for middag:\n";
+      let message = "Statistikk for formiddagen:\n";
       for (const userId in dailyStats) {
         const score = dailyStats[userId];
         message += `<@${userId}>: ${score} repetisjoner\n`; // Tagger brukeren og viser deres poengsum
