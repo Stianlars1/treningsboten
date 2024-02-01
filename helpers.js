@@ -91,8 +91,14 @@ export function loadTimestampFromFile(channelId) {
 async function getDailyExerciseMessage(channelId) {
   const trainingExercise = velgTilfeldigØvelse(); // Existing random exercise selection
   console.log("trainingExercise: ", trainingExercise.slice(0, 20));
-  const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
-  console.log("yesterday: ", yesterday);
+
+  // Calculate "yesterday" using the native JavaScript Date object
+  const today = new Date();
+  const yesterdayDate = new Date(today.setDate(today.getDate() - 1))
+    .toISOString()
+    .split("T")[0];
+  console.log("yesterday: ", yesterdayDate);
+
   const filePath = path.join(insightsDir, `${channelId}.json`);
   console.log("filePath: ", filePath);
 
@@ -101,12 +107,12 @@ async function getDailyExerciseMessage(channelId) {
 
   if (fs.existsSync(filePath)) {
     console.log("file exists");
-    const data = await JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
     console.log("data: ", data);
-    if (data[yesterday] && data[yesterday].winner) {
-      console.log("data[yesterday].winner: ", data[yesterday].winner);
-      const winner = Object.keys(data[yesterday].winner)[0];
-      const reps = data[yesterday].winner[winner];
+    if (data[yesterdayDate] && data[yesterdayDate].winner) {
+      console.log("data[yesterdayDate].winner: ", data[yesterdayDate].winner);
+      const winner = Object.keys(data[yesterdayDate].winner)[0];
+      const reps = data[yesterdayDate].winner[winner];
       message = `Gårsdagens vinner: <@${winner}> med ${reps} repetisjoner!\n\n${message}`;
     }
   }
@@ -137,7 +143,7 @@ async function sendExcerciseMessage(slackClient, channelId) {
       );
     }
   } catch (error) {
-    ConsoleLogError("sendLunchMessage", error, channelId);
+    ConsoleLogError("trainingExercise", error, channelId);
   }
 }
 
@@ -155,7 +161,7 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Schedule message sending every day at 10:00 AM
   cron.schedule(
-    `${15} ${15} * * 1-5`,
+    `${23} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -175,7 +181,7 @@ export function scheduleMessages(slackClient) {
     }
   );
   cron.schedule(
-    `${17} ${15} * * 1-5`,
+    `${24} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -196,7 +202,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${19} ${15} * * 1-5`,
+    `${25} ${15} * * 1-5`,
     async () => {
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
@@ -207,7 +213,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${20} ${15} * * 1-5`,
+    `${26} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
