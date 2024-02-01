@@ -2,6 +2,7 @@ import fs from "fs";
 import cron from "node-cron";
 import path from "path";
 import { fileURLToPath } from "url";
+import { getNoonStatsMessage } from "./stats.js";
 import { treningsØvelser } from "./treningsØvelser.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -232,6 +233,29 @@ async function sendExcerciseMessage(slackClient, channelId) {
   }
 }
 
+// send stats message at noon
+async function sendNoonMessage(slackClient, channelId) {
+  //  <@${event.user}> to tag the user
+  console.log("Sending noon message to channel: ", channelId);
+  try {
+    const noonStatsMessage = getNoonStatsMessage();
+
+    const result = await sendMessage(slackClient, channelId, noonStatsMessage);
+    if (result) {
+      console.log("Noon message sent successfully for channel: ", channelId);
+    } else {
+      console.log(
+        "Message not sent for channel: ",
+        channelId,
+        " with result: ",
+        result
+      );
+    }
+  } catch (error) {
+    ConsoleLogError("sendLunchMessage", error, channelId);
+  }
+}
+
 async function processLunchReplies(slackClient, channelId) {
   // Your existing logic for processing lunch replies
   const lastMessageTimestamp = loadTimestampFromFile(channelId);
@@ -302,6 +326,27 @@ export function scheduleMessages(slackClient) {
         }
         activeChannels.forEach((channelId) => {
           sendExcerciseMessage(slackClient, channelId);
+        });
+      } catch (error) {
+        ConsoleLogError("scheduleMessages { 10:00 } catch error: ", error);
+      }
+    },
+    {
+      timezone: "Europe/Oslo",
+    }
+  );
+  cron.schedule(
+    "*/60 * * * * *",
+    // `${0} ${10} * * 1-5`,
+    async () => {
+      try {
+        const activeChannels = getActiveChannels();
+        if (activeChannels.length === 0) {
+          console.log("No active channels!");
+          return;
+        }
+        activeChannels.forEach((channelId) => {
+          sendNoonMessage(slackClient, channelId);
         });
       } catch (error) {
         ConsoleLogError("scheduleMessages { 10:00 } catch error: ", error);

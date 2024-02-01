@@ -105,3 +105,35 @@ export function updateStats(channelId, threadTimestamp, userId, repetitions) {
     });
   });
 }
+
+export async function getNoonStatsMessage(channelId) {
+  const currentDate = format(new Date(), "yyyy-MM-dd"); // Format today's date as YYYY-MM-DD
+  const insightFilePath = path.join(insightsDir, `${channelId}.json`); // Path to the insight file for the channel
+
+  try {
+    // Check if the insight file exists
+    if (fs.existsSync(insightFilePath)) {
+      const data = JSON.parse(fs.readFileSync(insightFilePath, "utf8"));
+      const dailyStats = data[currentDate];
+
+      if (!dailyStats) {
+        return "No statistics available for today. Keep up the great work! 🚀";
+      }
+
+      let message = "Daily noon statistics:\n";
+      for (const userId in dailyStats) {
+        const score = dailyStats[userId];
+        message += `<@${userId}>: ${score} repetitions\n`; // Tagging the user and showing their score
+      }
+
+      message +=
+        "\nKeep it up! 💪 Remember, every repetition counts towards your weekly goal! 🎯";
+      return message;
+    } else {
+      return "No statistics available yet. Get moving and log your repetitions! 🏃‍♂️💨";
+    }
+  } catch (error) {
+    console.error("Error generating noon stats message:", error);
+    return "There was an error retrieving today’s statistics. Please try again later.";
+  }
+}
