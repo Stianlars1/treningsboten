@@ -94,6 +94,40 @@ slackEvents.on("message", async (event) => {
   }
 });
 
+slackEvents.on("app_mention", async (event) => {
+  console.log("app_mention: ", event);
+  if (event.user === "U06GNEFMBMX") {
+    // Replace with your bot's actual user ID
+    console.log(`Bot removed from channel: ${event.channel}`);
+    //await removeChannel(event.channel);
+  }
+});
+
+slackEvents.on("member_left_channel", async (event) => {
+  console.log("member_left_channel: ", event);
+  if (event.user === "U06GNEFMBMX") {
+    // Replace with your bot's actual user ID
+    console.log(`Bot removed from channel: ${event.channel}`);
+    //await removeChannel(event.channel);
+  }
+});
+slackEvents.on("group_left", async (event) => {
+  console.log("group_left: ", event);
+  if (event.user === "U06GNEFMBMX") {
+    // Replace with your bot's actual user ID
+    console.log(`Bot removed from channel: ${event.channel}`);
+    //await removeChannel(event.channel);
+  }
+});
+slackEvents.on("channel_left", async (event) => {
+  console.log("channel_left: ", event);
+  if (event.user === "U06GNEFMBMX") {
+    // Replace with your bot's actual user ID
+    console.log(`Bot removed from channel: ${event.channel}`);
+    //await removeChannel(event.channel);
+  }
+});
+
 slackEvents.on("member_joined_channel", async (event) => {
   // Check if the member joined is the bot itself
   const isBot = event.user === config.SLACK_BOT_USER_ID; // todo: bytt til SPB1
