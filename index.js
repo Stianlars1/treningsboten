@@ -11,7 +11,7 @@ import {
   activeChannelsFile,
   getActiveChannels,
   initializeDirectoriesAndFiles,
-  scheduleMessages,
+  removeBotFromChannels,
   sendMessage,
 } from "./helpers.js";
 
@@ -26,7 +26,6 @@ initializeDirectoriesAndFiles();
 // Express app configurations
 const app = express();
 const PORT_SERVER = 3000;
-console.log("config:", config);
 
 // slack confs
 const {
@@ -43,10 +42,10 @@ const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
 const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID; // vår kanal ===
 
 // Schedule messages
-scheduleMessages(slackClient);
+//scheduleMessages(slackClient);
 
 // Remove today's blocked food
-//removeBotFromChannels(slackClient);
+removeBotFromChannels(slackClient);
 
 // Express and Slack event configurations
 app.use(cors());
@@ -64,7 +63,6 @@ process.on("unhandledRejection", (reason, promise) => {
 
 slackEvents.on("message", async (event) => {
   /*  == Handle replies in conversation == */
-  console.log("INCOMING MESSAGE!!! ", event);
   if (
     event.type === "message" &&
     event.thread_ts &&
@@ -80,51 +78,6 @@ slackEvents.on("message", async (event) => {
     if (!isNaN(repetitions)) {
       updateStatsForThread(channelId, threadTimestamp, userId, repetitions);
     }
-  }
-
-  // Check if the message is a command to remove the bot
-  if (
-    event.text &&
-    event.text.includes("/remove")
-    // event.text.includes("@Treningsboten")
-  ) {
-    console.log("message included /remove");
-    // Call the function to remove the channel from activeChannels.json
-    //await removeChannel(event.channel);
-  }
-});
-
-slackEvents.on("app_mention", async (event) => {
-  console.log("app_mention: ", event);
-  if (event.user === "U06GNEFMBMX") {
-    // Replace with your bot's actual user ID
-    console.log(`Bot removed from channel: ${event.channel}`);
-    //await removeChannel(event.channel);
-  }
-});
-
-slackEvents.on("member_left_channel", async (event) => {
-  console.log("member_left_channel: ", event);
-  if (event.user === "U06GNEFMBMX") {
-    // Replace with your bot's actual user ID
-    console.log(`Bot removed from channel: ${event.channel}`);
-    //await removeChannel(event.channel);
-  }
-});
-slackEvents.on("group_left", async (event) => {
-  console.log("group_left: ", event);
-  if (event.user === "U06GNEFMBMX") {
-    // Replace with your bot's actual user ID
-    console.log(`Bot removed from channel: ${event.channel}`);
-    //await removeChannel(event.channel);
-  }
-});
-slackEvents.on("channel_left", async (event) => {
-  console.log("channel_left: ", event);
-  if (event.user === "U06GNEFMBMX") {
-    // Replace with your bot's actual user ID
-    console.log(`Bot removed from channel: ${event.channel}`);
-    //await removeChannel(event.channel);
   }
 });
 
