@@ -404,7 +404,7 @@ export function removeBotFromChannels(slackClient) {
     cron.schedule(`${1} ${0} * * *`, () => removeBotFromChannel(slackClient), {
       timezone: "Europe/Oslo",
     });
-    cron.schedule("*/55 * * * *", () => removeBotFromChannel(slackClient), {
+    cron.schedule("*/55 * * * * *", () => removeBotFromChannel(slackClient), {
       timezone: "Europe/Oslo",
     });
   } catch (error) {
