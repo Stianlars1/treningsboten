@@ -107,30 +107,31 @@ export function updateStats(channelId, threadTimestamp, userId, repetitions) {
 }
 
 export async function getNoonStatsMessage(channelId) {
-  const currentDate = format(new Date(), "yyyy-MM-dd"); // Format today's date as YYYY-MM-DD
+  const currentDate = new Date().toISOString().split("T")[0]; // Format today's date as YYYY-MM-DD using native JavaScript
+
   const insightFilePath = path.join(insightsDir, `${channelId}.json`); // Path to the insight file for the channel
 
   try {
-    // Check if the insight file exists
+    // Sjekk om innsiktsfilen eksisterer
     if (fs.existsSync(insightFilePath)) {
       const data = JSON.parse(fs.readFileSync(insightFilePath, "utf8"));
       const dailyStats = data[currentDate];
 
       if (!dailyStats) {
-        return "No statistics available for today. Keep up the great work! 🚀";
+        return "Ingen statistikk tilgjengelig for i dag. Fortsett det gode arbeidet! 🚀";
       }
 
-      let message = "Daily noon statistics:\n";
+      let message = "Statistikk formiddagen:\n";
       for (const userId in dailyStats) {
         const score = dailyStats[userId];
-        message += `<@${userId}>: ${score} repetitions\n`; // Tagging the user and showing their score
+        message += `<@${userId}>: ${score} repetisjoner\n`; // Tagger brukeren og viser deres poengsum
       }
 
       message +=
-        "\nKeep it up! 💪 Remember, every repetition counts towards your weekly goal! 🎯";
+        "\nHold det gående! 💪 Husk, hver repetisjon teller mot ditt ukentlige mål! 🎯";
       return message;
     } else {
-      return "No statistics available yet. Get moving and log your repetitions! 🏃‍♂️💨";
+      return "Ingen statistikk er tilgjengelig ennå. Kom deg i bevegelse og loggfør dine repetisjoner! 🏃‍♂️💨";
     }
   } catch (error) {
     console.error("Error generating noon stats message:", error);
