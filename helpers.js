@@ -239,6 +239,7 @@ async function sendNoonMessage(slackClient, channelId) {
   console.log("\n\nSending noon message to channel: ", channelId);
   try {
     const noonStatsMessage = getNoonStatsMessage();
+    console.log("\nnoon message: ", noonStatsMessage);
 
     const result = await sendMessage(slackClient, channelId, noonStatsMessage);
     if (result) {

@@ -114,8 +114,11 @@ export async function getNoonStatsMessage(channelId) {
   try {
     // Sjekk om innsiktsfilen eksisterer
     if (fs.existsSync(insightFilePath)) {
+      console.log("file existed");
       const data = JSON.parse(fs.readFileSync(insightFilePath, "utf8"));
+      console.log("parsed data", data);
       const dailyStats = data[currentDate];
+      console.log("dailyStats", dailyStats);
 
       if (!dailyStats) {
         return "Ingen statistikk tilgjengelig for i dag. Fortsett det gode arbeidet! 🚀";
@@ -123,6 +126,7 @@ export async function getNoonStatsMessage(channelId) {
 
       let message = "Statistikk formiddagen:\n";
       for (const userId in dailyStats) {
+        console.log("userId", userId);
         const score = dailyStats[userId];
         message += `<@${userId}>: ${score} repetisjoner\n`; // Tagger brukeren og viser deres poengsum
       }
