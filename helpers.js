@@ -161,7 +161,7 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Schedule message sending every day at 10:00 AM
   cron.schedule(
-    `${23} ${15} * * 1-5`,
+    `${45} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -181,7 +181,7 @@ export function scheduleMessages(slackClient) {
     }
   );
   cron.schedule(
-    `${24} ${15} * * 1-5`,
+    `${46} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -202,7 +202,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${33} ${15} * * 1-5`,
+    `${47} ${15} * * 1-5`,
     async () => {
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
@@ -213,7 +213,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${26} ${15} * * 1-5`,
+    `${48} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -417,34 +417,46 @@ export async function removeChannel(channelId) {
 }
 
 export function calculateAndUpdateWinners() {
-  console.log("====  calculateAndUpdateWinners  ====");
-  const activeChannels = JSON.parse(
-    fs.readFileSync(path.join(activeChannelsFile, "utf8"))
-  );
-  console.log("activeChannels: ", activeChannels);
-  const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
-  console.log("yesterday: ", yesterday);
-  activeChannels.forEach((channelId) => {
-    const filePath = path.join(insightsDir, `${channelId}.json`);
-    console.log("filePath: ", filePath);
-    if (fs.existsSync(filePath)) {
-      console.log("file exists");
-      const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
-      console.log("data: ", data);
-      if (data[yesterday]) {
-        console.log("data[yesterday]: ", data[yesterday]);
-        const dayData = data[yesterday];
-        const winner = Object.keys(dayData).reduce((acc, userId) => {
-          return !acc || dayData[userId] > dayData[acc] ? userId : acc;
-        }, null);
-        console.log("winner: ", winner);
-        if (winner) {
-          data[yesterday].winner = { [winner]: dayData[winner] };
+  console.log("==== calculateAndUpdateWinners ====");
+  try {
+    // Correctly read the activeChannels.json file
+    const activeChannels = JSON.parse(
+      fs.readFileSync(activeChannelsFile, "utf8")
+    );
+    console.log("activeChannels: ", activeChannels);
 
-          console.log("dayData: ", dayData[winner]);
-          fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+    // Assuming you want to keep using the date-fns library for date manipulation
+    // If not, you'll need to replace the following line with the native JavaScript date manipulation as before
+    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1))
+      .toISOString()
+      .split("T")[0];
+    console.log("yesterday: ", yesterday);
+
+    activeChannels.forEach((channelId) => {
+      const filePath = path.join(insightsDir, `${channelId}.json`);
+      console.log("filePath: ", filePath);
+      if (fs.existsSync(filePath)) {
+        console.log("file exists");
+        const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        console.log("data: ", data);
+
+        if (data[yesterday]) {
+          console.log("data[yesterday]: ", data[yesterday]);
+          const dayData = data[yesterday];
+          const winner = Object.keys(dayData).reduce((acc, userId) => {
+            return !acc || dayData[userId] > dayData[acc] ? userId : acc;
+          }, null);
+          console.log("winner: ", winner);
+
+          if (winner) {
+            data[yesterday].winner = { [winner]: dayData[winner] };
+            console.log("dayData: ", dayData[winner]);
+            fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+          }
         }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error("Error in calculateAndUpdateWinners: ", error);
+  }
 }
