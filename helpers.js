@@ -1,10 +1,10 @@
 import fs from "fs";
+import moment from "moment-timezone";
 import cron from "node-cron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { getNoonStatsMessage } from "./stats.js";
 import { treningsØvelser } from "./treningsØvelser.js";
-const moment = require("moment-timezone");
 
 process.env.TZ = "Europe/Oslo";
 
