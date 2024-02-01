@@ -12,6 +12,7 @@ import {
   getActiveChannels,
   initializeDirectoriesAndFiles,
   removeBotFromChannels,
+  scheduleMessages,
   sendMessage,
 } from "./helpers.js";
 
@@ -38,11 +39,9 @@ const {
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 // const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
 const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
-// const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID_PRIVAT; // vår kanal ===
-const oversikt_channel_Id = process.env.SLACK_CHANNEL_ID; // vår kanal ===
 
 // Schedule messages
-//scheduleMessages(slackClient);
+scheduleMessages(slackClient);
 
 // Remove today's blocked food
 removeBotFromChannels(slackClient);

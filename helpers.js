@@ -72,42 +72,6 @@ function saveTimestampToFile(channelId, timestamp) {
   }
 }
 
-export async function velgTilfeldigLunsjSvar(channel_id, randomSuggestion) {
-  // Fjern alle spørsmålstegn fra brukerens forslag
-  console.log(
-    "velger tilfeldig lunsj svar med input tekst: ",
-    randomSuggestion
-  );
-  if (typeof randomSuggestion !== "string") {
-    return "Ugyldig tekst";
-  }
-  let chatGPTresponse;
-  try {
-    if (channel_id === OVERSIKT_LUNSJ_CHANNEL) {
-      console.log(
-        "Team Oversikt entered the building! Let's use the private function of Chat GPT-4 shall we?"
-      );
-      chatGPTresponse = await analyzeWithGPT4(randomSuggestion);
-    }
-  } catch (error) {
-    console.log(
-      "error using gpt for oversikt, with gpt response: ",
-      chatGPTresponse
-    );
-  }
-  const cleanedSuggestion =
-    chatGPTresponse && chatGPTresponse.length > 0
-      ? chatGPTresponse
-      : randomSuggestion.replace(/\?/g, "");
-
-  const tilfeldigIndeks = Math.floor(Math.random() * lunsjSvar.length);
-  const emoji = finnEmojiForMatrett(cleanedSuggestion);
-  const lunsjSvaret =
-    lunsjSvar[tilfeldigIndeks].replace("{valg}", cleanedSuggestion) + emoji;
-
-  return lunsjSvaret;
-}
-
 export function loadTimestampFromFile(channelId) {
   try {
     const filePath = path.join(activeChannelsDir, `${channelId}.json`);
@@ -123,100 +87,36 @@ export function loadTimestampFromFile(channelId) {
 
 /** === Svar === */
 
-export function finnEmojiForMatrett(randomSuggestion) {
-  const matrett = randomSuggestion.toLowerCase();
-
-  if (
-    [
-      "burger",
-      "hamburger",
-      "cheeseburger",
-      "bastard",
-      "mc",
-      "mcdonalds",
-      "burger king",
-      "max",
-    ].some((item) => matrett.includes(item))
-  ) {
-    return "🍔";
-  }
-  if (
-    ["pizza", "digg pizza", "zz", "pizzabakeren", "dominos"].some((item) =>
-      matrett.includes(item)
-    )
-  ) {
-    return "🍕";
-  }
-  if (
-    ["sushi", "sushibar", "sushibar og grill"].some((item) =>
-      matrett.includes(item)
-    )
-  ) {
-    return "🍣";
-  }
-  if (
-    [
-      "baguett",
-      "baguette",
-      "baguetteria",
-      "baggis",
-      "bæggis",
-      "thai baguett",
-      "thai-baguette",
-      "baguet",
-    ].some((item) => matrett.includes(item))
-  ) {
-    return "🥖";
-  }
-  if (["kebab", "kebabrull"].some((item) => matrett.includes(item))) {
-    return "🥙";
-  }
-  if (
-    ["taco", "tacofredag", "burito", "burrito", "burritos"].some((item) =>
-      matrett.includes(item)
-    )
-  ) {
-    return "🌮";
-  }
-  if (matrett.includes("pasta")) {
-    return "🍝";
-  }
-
-  // Legg til flere matretter og deres emojis her
-
-  return ""; // Ingen matchende emoji funnet
-}
-
 /** === Commands === */
+async function getDailyExerciseMessage(channelId) {
+  const trainingExercise = velgTilfeldigØvelse(); // Existing random exercise selection
+  const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
+  const filePath = path.join(insightsDir, `${channelId}.json`);
 
-export function genererTilfeldigForslag() {
-  const tilfeldigIndeks = Math.floor(Math.random() * matForslag.length);
-  return matForslag[tilfeldigIndeks];
-}
+  let message = trainingExercise;
 
-export async function sendTidForLunsjMelding(slackClient, channelId) {
-  console.log("Sending its time for lunch message to channel: ", channelId);
-  try {
-    const message = velgTilfeldigTidForLunsjHilsen();
-    await sendMessage(slackClient, channelId, message);
-  } catch (error) {
-    ConsoleLogError("sendTidForLunsjMelding | error:\n", error);
+  if (fs.existsSync(filePath)) {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (data[yesterday] && data[yesterday].winner) {
+      const winner = Object.keys(data[yesterday].winner)[0];
+      const reps = data[yesterday].winner[winner];
+      message = `Gårsdagens vinner: <@${winner}> med ${reps} repetisjoner!\n\n${message}`;
+    }
   }
-}
 
-export function velgTilfeldigTidForLunsjHilsen() {
-  return tidForLunsjMeldinger[
-    Math.floor(Math.random() * tidForLunsjMeldinger.length)
-  ];
+  return message;
 }
 
 // send messages & read replies and answer
 async function sendExcerciseMessage(slackClient, channelId) {
   console.log("Sending excercise message to channel: ", channelId);
   try {
-    const trainingExcercise = velgTilfeldigØvelse();
-
-    const result = await sendMessage(slackClient, channelId, trainingExcercise);
+    const dailyExerciseMessage = await getDailyExerciseMessage(channelId);
+    const result = await sendMessage(
+      slackClient,
+      channelId,
+      dailyExerciseMessage
+    );
     if (result) {
       console.log("Message sent successfully for channel: ", channelId);
       saveTimestampToFile(channelId, result.ts);
@@ -247,8 +147,7 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Schedule message sending every day at 10:00 AM
   cron.schedule(
-    "*/40 * * * * *",
-    // `${0} ${10} * * 1-5`,
+    `${0} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -268,8 +167,7 @@ export function scheduleMessages(slackClient) {
     }
   );
   cron.schedule(
-    "*/30 * * * * *",
-    // `${0} ${10} * * 1-5`,
+    `${2} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -279,6 +177,38 @@ export function scheduleMessages(slackClient) {
         }
         activeChannels.forEach((channelId) => {
           sendNoonMessage(slackClient, channelId);
+        });
+      } catch (error) {
+        ConsoleLogError("scheduleMessages { 10:00 } catch error: ", error);
+      }
+    },
+    {
+      timezone: "Europe/Oslo",
+    }
+  );
+
+  cron.schedule(
+    `${4} ${15} * * 1-5`,
+    async () => {
+      console.log("Calculating and updating yesterday's winners");
+      calculateAndUpdateWinners();
+    },
+    {
+      timezone: "Europe/Oslo",
+    }
+  );
+
+  cron.schedule(
+    `${6} ${15} * * 1-5`,
+    async () => {
+      try {
+        const activeChannels = getActiveChannels();
+        if (activeChannels.length === 0) {
+          console.log("No active channels!");
+          return;
+        }
+        activeChannels.forEach((channelId) => {
+          sendExcerciseMessage(slackClient, channelId);
         });
       } catch (error) {
         ConsoleLogError("scheduleMessages { 10:00 } catch error: ", error);
@@ -438,27 +368,6 @@ async function removeBotFromChannel(slackClient) {
   }
 }
 
-async function addChannelInsight(channelId, lunchSuggestions, winner) {
-  try {
-    const currentDate = new Date(Date.now());
-    const formattedDate = currentDate.toLocaleDateString("no-NO");
-    const newInsight = {
-      channel: channelId,
-      suggestions: lunchSuggestions,
-      winner: winner,
-      timestamp: formattedDate,
-    };
-    const filePath = path.join(insightsDirectory, `${channelId}.json`);
-    const data = fs.existsSync(filePath)
-      ? JSON.parse(fs.readFileSync(filePath, "utf8"))
-      : [];
-    data.push(newInsight);
-    fs.writeFileSync(filePath, JSON.stringify(data));
-  } catch (error) {
-    ConsoleLogError("addChannelInsight", error);
-  }
-}
-
 export async function removeChannel(channelId) {
   console.log("TRYING TO REMOVE CHANNEL: ", channelId);
   fs.readFile(activeChannelsFile, "utf8", (err, data) => {
@@ -489,6 +398,30 @@ export async function removeChannel(channelId) {
           }
         }
       );
+    }
+  });
+}
+
+function calculateAndUpdateWinners() {
+  const activeChannels = JSON.parse(
+    fs.readFileSync(path.join(activeChannelsFile, "utf8"))
+  );
+  const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
+
+  activeChannels.forEach((channelId) => {
+    const filePath = path.join(insightsDir, `${channelId}.json`);
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      if (data[yesterday]) {
+        const dayData = data[yesterday];
+        const winner = Object.keys(dayData).reduce((acc, userId) => {
+          return !acc || dayData[userId] > dayData[acc] ? userId : acc;
+        }, null);
+        if (winner) {
+          data[yesterday].winner = { [winner]: dayData[winner] };
+          fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+        }
+      }
     }
   });
 }
