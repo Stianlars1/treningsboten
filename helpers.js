@@ -161,7 +161,8 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Schedule message sending every day at 10:00 AM
   cron.schedule(
-    `${45} ${15} * * 1-5`,
+    "*/30 * * * * * 1-5",
+    // `${1} ${0} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
