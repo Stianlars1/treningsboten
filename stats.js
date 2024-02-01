@@ -65,80 +65,84 @@ export function updateStatsForThread(
   }
 }
 
-export function updateStats(channelId, threadTimestamp, userId, repetitions) {
-  const filePath = path.join(insightsDir, `${channelId}.json`);
-  const dateKey = new Date(parseFloat(threadTimestamp) * 1000)
-    .toISOString()
-    .split("T")[0]; // Convert timestamp to date
+// export function updateStats(channelId, threadTimestamp, userId, repetitions) {
+//   const filePath = path.join(insightsDir, `${channelId}.json`);
+//   const dateKey = new Date(parseFloat(threadTimestamp) * 1000)
+//     .toISOString()
+//     .split("T")[0]; // Convert timestamp to date
 
-  fs.readFile(filePath, (err, data) => {
-    if (err && err.code === "ENOENT") {
-      // File not found, creating a new one
-      var stats = {};
-      stats[dateKey] = {};
-      stats[dateKey][userId] = repetitions;
-    } else if (err) {
-      console.error("Error reading file:", err);
-      return;
-    } else {
-      // File exists, update the existing data
-      var stats = JSON.parse(data);
+//   fs.readFile(filePath, (err, data) => {
+//     if (err && err.code === "ENOENT") {
+//       // File not found, creating a new one
+//       var stats = {};
+//       stats[dateKey] = {};
+//       stats[dateKey][userId] = repetitions;
+//     } else if (err) {
+//       console.error("Error reading file:", err);
+//       return;
+//     } else {
+//       // File exists, update the existing data
+//       var stats = JSON.parse(data);
 
-      if (!stats[dateKey]) {
-        stats[dateKey] = {};
-      }
+//       if (!stats[dateKey]) {
+//         stats[dateKey] = {};
+//       }
 
-      if (!stats[dateKey][userId]) {
-        stats[dateKey][userId] = 0;
-      }
+//       if (!stats[dateKey][userId]) {
+//         stats[dateKey][userId] = 0;
+//       }
 
-      stats[dateKey][userId] += repetitions;
-    }
+//       stats[dateKey][userId] += repetitions;
+//     }
 
-    // Write the updated data back to the file
-    fs.writeFile(filePath, JSON.stringify(stats, null, 2), (err) => {
-      if (err) {
-        console.error("Error writing file:", err);
-      } else {
-        console.log(`Stats updated for user ${userId} on ${dateKey}`);
-      }
-    });
-  });
-}
+//     // Write the updated data back to the file
+//     fs.writeFile(filePath, JSON.stringify(stats, null, 2), (err) => {
+//       if (err) {
+//         console.error("Error writing file:", err);
+//       } else {
+//         console.log(`Stats updated for user ${userId} on ${dateKey}`);
+//       }
+//     });
+//   });
+// }
 
 export async function getNoonStatsMessage(channelId) {
-  const currentDate = new Date().toISOString().split("T")[0]; // Format today's date as YYYY-MM-DD using native JavaScript
+  const currentDate = new Date().toISOString().split("T")[0]; // Formater dagens dato som YYYY-MM-DD med native JavaScript
+  console.log(`Current Date: ${currentDate}`); // Log the current date
 
-  const insightFilePath = path.join(insightsDir, `${channelId}.json`); // Path to the insight file for the channel
+  const insightFilePath = path.join(insightsDir, `${channelId}.json`); // Sti til innsiktsfilen for kanalen
+  console.log(`Insight File Path: ${insightFilePath}`); // Log the full path to the insights file
 
   try {
-    // Sjekk om innsiktsfilen eksisterer
+    // Check if the insight file exists
     if (fs.existsSync(insightFilePath)) {
-      console.log("file existed");
+      console.log(`Insight file exists for channel: ${channelId}`); // Confirm file exists
       const data = JSON.parse(fs.readFileSync(insightFilePath, "utf8"));
-      console.log("parsed data", data);
+      console.log(`Data read from file: `, data); // Log the data read from the file
+
       const dailyStats = data[currentDate];
-      console.log("dailyStats", dailyStats);
+      console.log(`Daily Stats for ${currentDate}: `, dailyStats); // Log the daily stats
 
       if (!dailyStats) {
         return "Ingen statistikk tilgjengelig for i dag. Fortsett det gode arbeidet! 🚀";
       }
 
-      let message = "Statistikk formiddagen:\n";
+      let message = "Statistikk for middag:\n";
       for (const userId in dailyStats) {
-        console.log("userId", userId);
         const score = dailyStats[userId];
         message += `<@${userId}>: ${score} repetisjoner\n`; // Tagger brukeren og viser deres poengsum
       }
 
       message +=
         "\nHold det gående! 💪 Husk, hver repetisjon teller mot ditt ukentlige mål! 🎯";
+      console.log(`Final message: ${message}`); // Log the final message
       return message;
     } else {
+      console.log(`No insight file found for channel: ${channelId}`); // Log if file doesn't exist
       return "Ingen statistikk er tilgjengelig ennå. Kom deg i bevegelse og loggfør dine repetisjoner! 🏃‍♂️💨";
     }
   } catch (error) {
-    console.error("Error generating noon stats message:", error);
-    return "There was an error retrieving today’s statistics. Please try again later.";
+    console.error("Feil ved generering av middagsstatistikk:", error);
+    return "Det oppstod en feil ved henting av dagens statistikk. Vennligst prøv igjen senere.";
   }
 }
