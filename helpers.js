@@ -90,20 +90,27 @@ export function loadTimestampFromFile(channelId) {
 /** === Commands === */
 async function getDailyExerciseMessage(channelId) {
   const trainingExercise = velgTilfeldigØvelse(); // Existing random exercise selection
+  console.log("trainingExercise: ", trainingExercise.slice(0, 20));
   const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
+  console.log("yesterday: ", yesterday);
   const filePath = path.join(insightsDir, `${channelId}.json`);
+  console.log("filePath: ", filePath);
 
   let message = trainingExercise;
+  console.log("initial message: ", message);
 
   if (fs.existsSync(filePath)) {
-    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    console.log("file exists");
+    const data = await JSON.parse(fs.readFileSync(filePath, "utf8"));
+    console.log("data: ", data);
     if (data[yesterday] && data[yesterday].winner) {
+      console.log("data[yesterday].winner: ", data[yesterday].winner);
       const winner = Object.keys(data[yesterday].winner)[0];
       const reps = data[yesterday].winner[winner];
       message = `Gårsdagens vinner: <@${winner}> med ${reps} repetisjoner!\n\n${message}`;
     }
   }
-
+  console.log("final message: ", message);
   return message;
 }
 
@@ -112,6 +119,7 @@ async function sendExcerciseMessage(slackClient, channelId) {
   console.log("Sending excercise message to channel: ", channelId);
   try {
     const dailyExerciseMessage = await getDailyExerciseMessage(channelId);
+    console.log("dailyExerciseMessage: ", dailyExerciseMessage);
     const result = await sendMessage(
       slackClient,
       channelId,
@@ -147,7 +155,7 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Schedule message sending every day at 10:00 AM
   cron.schedule(
-    `${0} ${15} * * 1-5`,
+    `${15} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -167,7 +175,7 @@ export function scheduleMessages(slackClient) {
     }
   );
   cron.schedule(
-    `${2} ${15} * * 1-5`,
+    `${17} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -188,7 +196,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${4} ${15} * * 1-5`,
+    `${19} ${15} * * 1-5`,
     async () => {
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
@@ -199,7 +207,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${6} ${15} * * 1-5`,
+    `${20} ${15} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
