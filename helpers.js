@@ -90,10 +90,10 @@ export function loadTimestampFromFile(channelId) {
 /** === Commands === */
 async function getDailyExerciseMessage(channelId) {
   const trainingExercise = velgTilfeldigØvelse(); // Existing random exercise selection
-  console.log("trainingExercise: ", trainingExercise.slice(0, 20));
 
   // Calculate "yesterday" using the native JavaScript Date object
   const today = new Date();
+  console.log("today: ", today.toISOString().split("T")[0]);
   const yesterdayDate = new Date(today.setDate(today.getDate() - 1))
     .toISOString()
     .split("T")[0];
@@ -125,7 +125,6 @@ async function sendExcerciseMessage(slackClient, channelId) {
   console.log("Sending excercise message to channel: ", channelId);
   try {
     const dailyExerciseMessage = await getDailyExerciseMessage(channelId);
-    console.log("dailyExerciseMessage: ", dailyExerciseMessage);
     const result = await sendMessage(
       slackClient,
       channelId,
@@ -161,7 +160,7 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Schedule message sending every day at 10:00 AM
   cron.schedule(
-    "*/30 * * * * * 1-5",
+    "*/20 * * * * * 1-5",
     // `${1} ${0} * * 1-5`,
     async () => {
       try {
@@ -203,7 +202,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${47} ${15} * * 1-5`,
+    "*/10 * * * * * 1-5",
     async () => {
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
