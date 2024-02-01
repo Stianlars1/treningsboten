@@ -238,7 +238,7 @@ async function sendNoonMessage(slackClient, channelId) {
   //  <@${event.user}> to tag the user
   console.log("\n\nSending noon message to channel: ", channelId);
   try {
-    const noonStatsMessage = getNoonStatsMessage();
+    const noonStatsMessage = getNoonStatsMessage(channelId);
     console.log("\nnoon message: ", noonStatsMessage);
 
     const result = await sendMessage(slackClient, channelId, noonStatsMessage);
