@@ -18,6 +18,7 @@ import {
 import { updateStatsForThread } from "./stats.js";
 
 import { config } from "./config.js";
+process.env.TZ = "Europe/Oslo";
 
 // initialize directories and files
 // activeChannelsFile, blockedFoodsFilePrefix
