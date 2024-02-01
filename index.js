@@ -11,7 +11,6 @@ import {
   activeChannelsFile,
   getActiveChannels,
   initializeDirectoriesAndFiles,
-  removeChannel,
   scheduleMessages,
   sendMessage,
 } from "./helpers.js";
@@ -65,7 +64,7 @@ process.on("unhandledRejection", (reason, promise) => {
 
 slackEvents.on("message", async (event) => {
   /*  == Handle replies in conversation == */
-  console.log("INCOMING MESSAGE!!! ");
+  console.log("INCOMING MESSAGE!!! ", event);
   if (
     event.type === "message" &&
     event.thread_ts &&
@@ -86,11 +85,12 @@ slackEvents.on("message", async (event) => {
   // Check if the message is a command to remove the bot
   if (
     event.text &&
-    event.text.includes("/remove") &&
-    event.text.includes("@Treningsboten")
+    event.text.includes("/remove")
+    // event.text.includes("@Treningsboten")
   ) {
+    console.log("message included /remove");
     // Call the function to remove the channel from activeChannels.json
-    await removeChannel(event.channel);
+    //await removeChannel(event.channel);
   }
 });
 
