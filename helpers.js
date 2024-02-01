@@ -394,11 +394,8 @@ function removeFromActiveChannels(channelId) {
 export function removeBotFromChannels(slackClient) {
   console.log("Scheduling channel check...");
   try {
-    cron.schedule(`${58} ${9} * * *`, () => removeBotFromChannel(slackClient), {
-      timezone: "Europe/Oslo",
-    });
     cron.schedule(
-      `${43} ${10} * * *`,
+      `${55} ${11} * * *`,
       () => removeBotFromChannel(slackClient),
       {
         timezone: "Europe/Oslo",
@@ -407,8 +404,14 @@ export function removeBotFromChannels(slackClient) {
     cron.schedule(`${1} ${0} * * *`, () => removeBotFromChannel(slackClient), {
       timezone: "Europe/Oslo",
     });
+    cron.schedule("*/55 * * * *", () => removeBotFromChannel(slackClient), {
+      timezone: "Europe/Oslo",
+    });
   } catch (error) {
-    ConsoleLogError(`removeBotFromChannels at timeslot: ${new Date()}`, error);
+    ConsoleLogError(
+      `removeBotFromChannels error at timeslot: ${new Date()}`,
+      error
+    );
   }
 }
 
@@ -424,7 +427,7 @@ async function removeBotFromChannel(slackClient) {
         // Bot is no longer a member of the channel
         // Bot is removed from the channel
         // Delete channel data
-        deleteChannelData(channelId);
+        // deleteChannelData(channelId);
 
         // Remove channel from active channels
         removeFromActiveChannels(channelId);
