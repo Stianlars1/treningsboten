@@ -236,7 +236,7 @@ async function sendExcerciseMessage(slackClient, channelId) {
 // send stats message at noon
 async function sendNoonMessage(slackClient, channelId) {
   //  <@${event.user}> to tag the user
-  console.log("Sending noon message to channel: ", channelId);
+  console.log("\n\nSending noon message to channel: ", channelId);
   try {
     const noonStatsMessage = getNoonStatsMessage();
 
@@ -336,7 +336,7 @@ export function scheduleMessages(slackClient) {
     }
   );
   cron.schedule(
-    "*/60 * * * * *",
+    "*/30 * * * * *",
     // `${0} ${10} * * 1-5`,
     async () => {
       try {
