@@ -3,7 +3,7 @@ import moment from "moment-timezone";
 import cron from "node-cron";
 import path from "path";
 import { fileURLToPath } from "url";
-import { sendHalfWeekUpdate } from "./cronMessages.js";
+import { sendFullWeekUpdate, sendHalfWeekUpdate } from "./cronMessages.js";
 import { getNoonStatsMessage } from "./stats.js";
 import { treningsØvelser } from "./treningsØvelser.js";
 
@@ -91,6 +91,7 @@ export function loadTimestampFromFile(channelId) {
 
 /** === Commands === */
 async function getDailyExerciseMessage(channelId) {
+  console.log("\n=== getDailyExerciseMessage ===");
   const trainingExercise = velgTilfeldigØvelse(); // Existing random exercise selection
 
   // Use moment-timezone to get "today" and "yesterday" in Norwegian time zone
@@ -103,29 +104,24 @@ async function getDailyExerciseMessage(channelId) {
   console.log("yesterday: ", yesterdayDate);
 
   const filePath = path.join(insightsDir, `${channelId}.json`);
-  console.log("filePath: ", filePath);
-
   let message = trainingExercise;
-  console.log("initial message: ", message);
 
   if (fs.existsSync(filePath)) {
     console.log("file exists");
     const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
     console.log("data: ", data);
     if (data[yesterdayDate] && data[yesterdayDate].winner) {
-      console.log("data[yesterdayDate].winner: ", data[yesterdayDate].winner);
       const winner = Object.keys(data[yesterdayDate].winner)[0];
       const reps = data[yesterdayDate].winner[winner];
-      message = `Gårsdagens vinner: <@${winner}> med ${reps} repetisjoner!\n\n${message}`;
+      message = `Gårsdagens vinner: <@${winner}> med ${reps} repetisjoner!:fire:\n\n${message}`;
     }
   }
-  console.log("final message: ", message);
   return message;
 }
 
 // send messages & read replies and answer
 async function sendExcerciseMessage(slackClient, channelId) {
-  console.log("Sending excercise message to channel: ", channelId);
+  console.log("\n\n== sendExcerciseMessage ==");
   try {
     const dailyExerciseMessage = await getDailyExerciseMessage(channelId);
     const result = await sendMessage(
@@ -161,10 +157,24 @@ async function sendNoonMessage(slackClient, channelId) {
 }
 
 export function scheduleMessages(slackClient) {
-  // Schedule message sending every day at 10:00 AM
+  // Oppdater vinneren fra gårsdagen
   cron.schedule(
-    "*/20 * * * * * 1-5",
-    // `${1} ${0} * * 1-5`,
+    "10 * * * 1-5",
+    //"0 1 * * 1-5",
+    async () => {
+      console.log("Calculating and updating yesterday's winners");
+      calculateAndUpdateWinners();
+    },
+    {
+      timezone: "Europe/Oslo",
+    }
+  );
+
+  // Sende dagens øvelse m/gårdsdagens vinner
+  cron.schedule(
+    "20 * * * 1-5",
+    //"*/20 * * * * * 1-5",
+    // `${0} ${9} * * 1-5`,
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -183,40 +193,34 @@ export function scheduleMessages(slackClient) {
       timezone: "Europe/Oslo",
     }
   );
-  cron.schedule(
-    `${46} ${15} * * 1-5`,
-    async () => {
-      try {
-        const activeChannels = getActiveChannels();
-        if (activeChannels.length === 0) {
-          console.log("No active channels!");
-          return;
-        }
-        activeChannels.forEach((channelId) => {
-          sendNoonMessage(slackClient, channelId);
-        });
-      } catch (error) {
-        ConsoleLogError("scheduleMessages { 10:00 } catch error: ", error);
-      }
-    },
-    {
-      timezone: "Europe/Oslo",
-    }
-  );
 
-  cron.schedule(
-    "*/20 * * * * * 1-5",
-    async () => {
-      console.log("Calculating and updating yesterday's winners");
-      calculateAndUpdateWinners();
-    },
-    {
-      timezone: "Europe/Oslo",
-    }
-  );
+  // Sende oppdatering hver dag 12:00
+  // cron.schedule(
+  //   // `0 12 * * 1-5`,
+  //   async () => {
+  //     try {
+  //       const activeChannels = getActiveChannels();
+  //       if (activeChannels.length === 0) {
+  //         console.log("No active channels!");
+  //         return;
+  //       }
+  //       activeChannels.forEach((channelId) => {
+  //         sendNoonMessage(slackClient, channelId);
+  //       });
+  //     } catch (error) {
+  //       ConsoleLogError("scheduleMessages { 10:00 } catch error: ", error);
+  //     }
+  //   },
+  //   {
+  //     timezone: "Europe/Oslo",
+  //   }
+  // );
 
+  // Onsdagens halv-uke opdpatering
   cron.schedule(
-    "*/15 * * * * * 1-5",
+    "30 * * * 1-5",
+    //"*/10 * * * * * 1-5",
+    // "0 0 12 * * 3",
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -230,6 +234,32 @@ export function scheduleMessages(slackClient) {
       } catch (error) {
         ConsoleLogError(
           "sendHalfWeekUpdate wednesday { 12:00 } catch error: ",
+          error
+        );
+      }
+    },
+    {
+      timezone: "Europe/Oslo",
+    }
+  );
+
+  // Fredag fulluke opdpatering
+  cron.schedule(
+    "40 * * * 1-5",
+    //"0 0 12 * * 5",
+    async () => {
+      try {
+        const activeChannels = getActiveChannels();
+        if (activeChannels.length === 0) {
+          console.log("No active channels!");
+          return;
+        }
+        activeChannels.forEach((channelId) => {
+          sendFullWeekUpdate(slackClient, channelId);
+        });
+      } catch (error) {
+        ConsoleLogError(
+          "sendFullWeekUpdate Friday { 12:00 } catch error: ",
           error
         );
       }
@@ -423,31 +453,27 @@ export async function removeChannel(channelId) {
 }
 
 export function calculateAndUpdateWinners() {
-  console.log("==== calculateAndUpdateWinners ====");
+  console.log("\n\n==== calculateAndUpdateWinners ====");
   try {
     // Correctly read the activeChannels.json file
     const activeChannels = JSON.parse(
       fs.readFileSync(activeChannelsFile, "utf8")
     );
-    console.log("activeChannels: ", activeChannels);
-
     // Use moment-timezone to get 'yesterday' in the Oslo timezone
+    const today = moment.tz("Europe/Oslo").format("YYYY-MM-DD");
     const yesterday = moment
       .tz("Europe/Oslo")
       .subtract(1, "days")
       .format("YYYY-MM-DD");
+    console.log("today: ", today);
     console.log("yesterday: ", yesterday);
 
     activeChannels.forEach((channelId) => {
       const filePath = path.join(insightsDir, `${channelId}.json`);
-      console.log("filePath: ", filePath);
       if (fs.existsSync(filePath)) {
-        console.log("file exists");
         const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
-        console.log("data: ", data);
 
         if (data[yesterday]) {
-          console.log("data[yesterday]: ", data[yesterday]);
           const dayData = data[yesterday];
           const winner = Object.keys(dayData).reduce((acc, userId) => {
             return !acc || dayData[userId] > dayData[acc] ? userId : acc;
@@ -456,7 +482,6 @@ export function calculateAndUpdateWinners() {
 
           if (winner) {
             data[yesterday].winner = { [winner]: dayData[winner] };
-            console.log("dayData: ", dayData[winner]);
             fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
           }
         }
