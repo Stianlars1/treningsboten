@@ -1,0 +1,6 @@
+// Helper function to get the start of the week (Monday) for a given date
+import moment from "moment-timezone";
+
+export function getWeekStart(date) {
+  return moment(date).tz("Europe/Oslo").startOf("isoWeek");
+}

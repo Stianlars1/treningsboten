@@ -3,6 +3,7 @@ import moment from "moment-timezone";
 import cron from "node-cron";
 import path from "path";
 import { fileURLToPath } from "url";
+import { sendHalfWeekUpdate } from "./cronMessages.js";
 import { getNoonStatsMessage } from "./stats.js";
 import { treningsØvelser } from "./treningsØvelser.js";
 
@@ -87,8 +88,6 @@ export function loadTimestampFromFile(channelId) {
   }
   return null;
 }
-
-/** === Svar === */
 
 /** === Commands === */
 async function getDailyExerciseMessage(channelId) {
@@ -206,7 +205,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    "*/10 * * * * * 1-5",
+    "*/20 * * * * * 1-5",
     async () => {
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
@@ -217,7 +216,7 @@ export function scheduleMessages(slackClient) {
   );
 
   cron.schedule(
-    `${48} ${15} * * 1-5`,
+    "*/15 * * * * * 1-5",
     async () => {
       try {
         const activeChannels = getActiveChannels();
@@ -226,10 +225,13 @@ export function scheduleMessages(slackClient) {
           return;
         }
         activeChannels.forEach((channelId) => {
-          sendExcerciseMessage(slackClient, channelId);
+          sendHalfWeekUpdate(slackClient, channelId);
         });
       } catch (error) {
-        ConsoleLogError("scheduleMessages { 10:00 } catch error: ", error);
+        ConsoleLogError(
+          "sendHalfWeekUpdate wednesday { 12:00 } catch error: ",
+          error
+        );
       }
     },
     {
