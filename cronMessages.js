@@ -142,12 +142,21 @@ export async function sendMonthlyUpdates(slackClient) {
       return;
     }
 
-    const sortedUsers = Object.entries(stats).sort((a, b) => b[1] - a[1]); // Sort users by their total repetitions
-    let message = `Hei superhelter 🚀 Månedens oppsummering er her!\n\n🏆 Månedens topp 3:\n`;
+    // Filter out non-user entries before sorting
+    const filteredUsers = Object.entries(stats).filter(
+      ([userId, _]) => !nonUserKeys.includes(userId)
+    );
 
+    // Now sort the filtered list of users by their total repetitions
+    const sortedUsers = filteredUsers.sort((a, b) => b[1] - a[1]);
+
+    let message =
+      "Hei superhelter 🚀 Månedens oppsummering er her!\n\n🏆 *Månedens topp 3* 🏆\n\n";
+
+    // Iterate over the top 3 users, if available, after filtering and sorting
     sortedUsers.slice(0, 3).forEach(([userId, reps], index) => {
       const medal = ["🥇", "🥈", "🥉"][index];
-      message += `${medal} <@${userId}> med ${reps} repetisjoner\n`;
+      message += `${medal} <@${userId}> med ${reps} repetisjoner:fire:\n`;
     });
 
     message += `\nFantastisk innsats alle sammen! La oss gjøre neste måned enda bedre! 🚀🎉`;
