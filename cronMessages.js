@@ -133,6 +133,8 @@ export async function sendFullWeekUpdate(slackClient, channelId) {
 }
 
 export async function sendMonthlyUpdates(slackClient) {
+  const nonUserKeys = ["winner"]; // Add more non-user keys as needed
+
   const channelsData = getActiveChannels(); // Assuming this function returns an array of channel IDs
   channelsData.forEach(async (channelId) => {
     const stats = await compileMonthlyStats(channelId); // Assume this function compiles the monthly stats
