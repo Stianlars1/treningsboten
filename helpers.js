@@ -218,7 +218,7 @@ export function scheduleMessages(slackClient) {
           "days"
         );
         if (today.isSame(lastWeekday, "day")) {
-          await sendMonthlyUpdates(); // Your function to send updates
+          await sendMonthlyUpdates(slackClient); // Your function to send updates
         }
       } else if (today.isSame(lastDayOfMonth, "day")) {
         console.log("\n\n== Sending monthly updates ==");
