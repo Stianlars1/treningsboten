@@ -11,6 +11,7 @@ import {
   activeChannelsFile,
   getActiveChannels,
   initializeDirectoriesAndFiles,
+  removeBotFromChannels,
   scheduleMessages,
   sendMessage,
 } from "./helpers.js";
@@ -44,7 +45,7 @@ const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
 scheduleMessages(slackClient);
 
 // Remove today's blocked food
-//removeBotFromChannels(slackClient); // remember to add this
+removeBotFromChannels(slackClient); // remember to add this
 
 // Express and Slack event configurations
 app.use(cors());
