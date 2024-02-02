@@ -57,7 +57,7 @@ export async function sendHalfWeekUpdate(slackClient, channelId) {
       });
 
       // Update the message with the user that has the most repetitions
-      statsMessage += `\nDet kan se ut som at ${maxUser} ligger an til å vinne denne ukas fitness-trofee:trophy:, kan noen klare å ta han igjen?:bangbang:\n\nStå på ut uken!💪🏻`;
+      statsMessage += `\nDet kan se ut som at <@${maxUser}> ligger an til å vinne denne ukas fitness-trofee:trophy:, kan noen klare å ta han igjen?:bangbang:\n\nStå på ut uken!💪🏻`;
 
       // Use your existing sendMessage function to send the statsMessage to the channel
       const result = await sendMessage(slackClient, channelId, statsMessage);
