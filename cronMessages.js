@@ -46,7 +46,9 @@ export async function sendHalfWeekUpdate(slackClient, channelId) {
       let maxUser = null;
       let maxReps = 0;
       Object.entries(userTotals).forEach(([userId, totalReps]) => {
-        statsMessage += `${userId}: ${totalReps} :fire:\n`;
+        if (userId === "winner") return; // Skip the winner from the previous week
+
+        statsMessage += `<@${userId}>: ${totalReps} :fire:\n`;
         if (totalReps > maxReps) {
           maxUser = userId;
           maxReps = totalReps;
