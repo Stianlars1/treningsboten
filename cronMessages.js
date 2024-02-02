@@ -2,7 +2,7 @@ import fs from "fs";
 import moment from "moment-timezone";
 import path from "path";
 import { fileURLToPath } from "url";
-import { getWeekStart } from "./dates.js";
+import { getWeekStart, getWeekStartForFriday } from "./dates.js";
 import { sendMessage } from "./helpers.js";
 
 process.env.TZ = "Europe/Oslo";
@@ -17,6 +17,7 @@ export const activeChannelsFile = path.join(
 );
 
 export async function sendHalfWeekUpdate(slackClient, channelId) {
+  console.log("\n\n== sendHalfWeekUpdate ==");
   try {
     const today = moment().tz("Europe/Oslo");
     const weekStart = getWeekStart(today);
@@ -48,7 +49,7 @@ export async function sendHalfWeekUpdate(slackClient, channelId) {
       Object.entries(userTotals).forEach(([userId, totalReps]) => {
         if (userId === "winner") return; // Skip the winner from the previous week
 
-        statsMessage += `<@${userId}>: ${totalReps} :fire:\n`;
+        statsMessage += `<@${userId}>: ${totalReps} reps :fire:\n`;
         if (totalReps > maxReps) {
           maxUser = userId;
           maxReps = totalReps;
@@ -76,5 +77,56 @@ export async function sendHalfWeekUpdate(slackClient, channelId) {
     }
   } catch (error) {
     console.error("Error in sendHalfWeekUpdate: ", error);
+  }
+}
+
+// Function to send the full-week update every Friday
+export async function sendFullWeekUpdate(slackClient, channelId) {
+  console.log("\n\n== sendFullWeekUpdate ==");
+  try {
+    const today = moment().tz("Europe/Oslo");
+    const weekStart = getWeekStartForFriday(today);
+    const filePath = path.join(insightsDir, `${channelId}.json`);
+
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      let statsMessage =
+        "Hei superhelter 🚀 Fredagens ukeoppdatering er her!\n\nStatistikk for hele uken:\n";
+
+      let userTotals = {}; // Object to hold the total repetitions for each user from Monday to Friday
+
+      // Loop through each day from Monday to Friday and sum repetitions for each user
+      for (let day = 0; day <= 4; day++) {
+        const currentDate = moment(weekStart)
+          .add(day, "days")
+          .format("YYYY-MM-DD");
+        if (data[currentDate]) {
+          Object.entries(data[currentDate]).forEach(([userId, reps]) => {
+            if (!userTotals[userId]) userTotals[userId] = 0;
+            userTotals[userId] += reps;
+          });
+        }
+      }
+
+      // Find the user with the highest total
+      let maxUser = null;
+      let maxReps = 0;
+      Object.entries(userTotals).forEach(([userId, totalReps]) => {
+        if (userId === "winner") return; // Skip the winner from the previous week
+        statsMessage += `<@${userId}>: ${totalReps} reps :fire:\n`;
+        if (totalReps > maxReps) {
+          maxUser = userId;
+          maxReps = totalReps;
+        }
+      });
+
+      // Update the message with a cooler Friday approach
+      statsMessage += `\nOg vinneren for denne uka er \n\n<@${maxUser}> med ${maxReps} repetisjoner! 🎉 \n\nHvem tar utfordringen og overgår dette før helgen? 💪\n\nGod helg og lad opp til nye utfordringer neste uke! 🚀`;
+
+      // Use your existing sendMessage function to send the statsMessage to the channel
+      await sendMessage(slackClient, channelId, statsMessage);
+    }
+  } catch (error) {
+    console.error("Error in sendFullWeekUpdate: ", error);
   }
 }
