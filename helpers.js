@@ -162,6 +162,7 @@ export function scheduleMessages(slackClient) {
     "10 * * * 1-5",
     //"0 1 * * 1-5",
     async () => {
+      console.log("\n1");
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
     },
@@ -176,6 +177,8 @@ export function scheduleMessages(slackClient) {
     //"*/20 * * * * * 1-5",
     // `${0} ${9} * * 1-5`,
     async () => {
+      console.log("\n2");
+
       try {
         const activeChannels = getActiveChannels();
         if (activeChannels.length === 0) {
@@ -222,6 +225,8 @@ export function scheduleMessages(slackClient) {
     //"*/10 * * * * * 1-5",
     // "0 0 12 * * 3",
     async () => {
+      console.log("\n3");
+
       try {
         const activeChannels = getActiveChannels();
         if (activeChannels.length === 0) {
@@ -248,6 +253,7 @@ export function scheduleMessages(slackClient) {
     "40 * * * 1-5",
     //"0 0 12 * * 5",
     async () => {
+      console.log("\n4");
       try {
         const activeChannels = getActiveChannels();
         if (activeChannels.length === 0) {
