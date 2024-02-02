@@ -222,11 +222,11 @@ export function scheduleMessages(slackClient) {
         }
       } else if (today.isSame(lastDayOfMonth, "day")) {
         console.log("\n\n== Sending monthly updates ==");
-        await sendMonthlyUpdates(); // Your function to send updates
+        await sendMonthlyUpdates(slackClient); // Your function to send updates
       } else {
         console.log("\n\n== Sending monthly updates ==");
         console.log("\n ETST TEST TEST");
-        await sendMonthlyUpdates(); // Your function to send updates
+        await sendMonthlyUpdates(slackClient); // Your function to send updates
       }
     },
     {
