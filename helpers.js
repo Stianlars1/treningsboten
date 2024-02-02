@@ -159,7 +159,7 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Oppdater vinneren fra gårsdagen
   cron.schedule(
-    "10 * * * 1-5",
+    "10 * * * * 1-5",
     //"0 1 * * 1-5",
     async () => {
       console.log("\n1");
@@ -173,7 +173,7 @@ export function scheduleMessages(slackClient) {
 
   // Sende dagens øvelse m/gårdsdagens vinner
   cron.schedule(
-    "20 * * * 1-5",
+    "20 * * * * 1-5",
     //"*/20 * * * * * 1-5",
     // `${0} ${9} * * 1-5`,
     async () => {
@@ -221,7 +221,7 @@ export function scheduleMessages(slackClient) {
 
   // Onsdagens halv-uke opdpatering
   cron.schedule(
-    "30 * * * 1-5",
+    "30 * * * * 1-5",
     //"*/10 * * * * * 1-5",
     // "0 0 12 * * 3",
     async () => {
@@ -250,7 +250,7 @@ export function scheduleMessages(slackClient) {
 
   // Fredag fulluke opdpatering
   cron.schedule(
-    "40 * * * 1-5",
+    "40 * * * * 1-5",
     //"0 0 12 * * 5",
     async () => {
       console.log("\n4");
