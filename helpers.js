@@ -428,7 +428,7 @@ export function removeBotFromChannels(slackClient) {
     cron.schedule(`${1} ${0} * * *`, () => removeBotFromChannel(slackClient), {
       timezone: "Europe/Oslo",
     });
-    cron.schedule("*/55 * * * * *", () => removeBotFromChannel(slackClient), {
+    cron.schedule("3 * * * * *", () => removeBotFromChannel(slackClient), {
       timezone: "Europe/Oslo",
     });
   } catch (error) {
@@ -440,6 +440,7 @@ export function removeBotFromChannels(slackClient) {
 }
 
 async function removeBotFromChannel(slackClient) {
+  console.log("\n\n=== removeBotFromChannel ===");
   try {
     console.log("Checking for channels to remove bot from...");
     const slackChannels = await fetchSlackChannels(slackClient); // Implement this function to use Slack's API
