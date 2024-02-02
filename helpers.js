@@ -3,7 +3,11 @@ import moment from "moment-timezone";
 import cron from "node-cron";
 import path from "path";
 import { fileURLToPath } from "url";
-import { sendFullWeekUpdate, sendHalfWeekUpdate } from "./cronMessages.js";
+import {
+  sendFullWeekUpdate,
+  sendHalfWeekUpdate,
+  sendMonthlyUpdates,
+} from "./cronMessages.js";
 import { getNoonStatsMessage } from "./stats.js";
 import { treningsØvelser } from "./treningsØvelser.js";
 
@@ -193,6 +197,40 @@ export function scheduleMessages(slackClient) {
       }
     },
     {
+      timezone: "Europe/Oslo",
+    }
+  );
+
+  // Send monthly updates, but run everyday to check if it's the last day of the month
+  cron.schedule(
+    "50 * * * * 1-5",
+    //"0 0 12 * * *",
+    async () => {
+      const today = moment().tz("Europe/Oslo");
+      const lastDayOfMonth = moment(today).endOf("month");
+      const isWeekend = [6, 0].includes(lastDayOfMonth.day());
+
+      if (isWeekend) {
+        console.log("\n\n== Sending monthly updates ==");
+        // If the last day is a weekend, find the previous Friday
+        const lastWeekday = lastDayOfMonth.subtract(
+          lastDayOfMonth.day() === 0 ? 2 : 1,
+          "days"
+        );
+        if (today.isSame(lastWeekday, "day")) {
+          await sendMonthlyUpdates(); // Your function to send updates
+        }
+      } else if (today.isSame(lastDayOfMonth, "day")) {
+        console.log("\n\n== Sending monthly updates ==");
+        await sendMonthlyUpdates(); // Your function to send updates
+      } else {
+        console.log("\n\n== Sending monthly updates ==");
+        console.log("\n ETST TEST TEST");
+        await sendMonthlyUpdates(); // Your function to send updates
+      }
+    },
+    {
+      scheduled: true,
       timezone: "Europe/Oslo",
     }
   );

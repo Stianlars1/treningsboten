@@ -3,7 +3,8 @@ import moment from "moment-timezone";
 import path from "path";
 import { fileURLToPath } from "url";
 import { getWeekStart, getWeekStartForFriday } from "./dates.js";
-import { sendMessage } from "./helpers.js";
+import { getActiveChannels, sendMessage } from "./helpers.js";
+import { compileMonthlyStats } from "./stats.js";
 
 process.env.TZ = "Europe/Oslo";
 
@@ -57,7 +58,7 @@ export async function sendHalfWeekUpdate(slackClient, channelId) {
       });
 
       // Update the message with the user that has the most repetitions
-      statsMessage += `\nDet kan se ut som at <@${maxUser}> ligger an til å vinne denne ukas fitness-trofee:trophy:, kan noen klare å ta han igjen?:bangbang:\n\nStå på ut uken!💪🏻`;
+      statsMessage += `\nDet kan se ut som at <@${maxUser}> ligger an til å *vinne* denne ukas fitness-trofee:trophy: kan noen klare å ta han igjen?:bangbang:\n\nStå på ut uken!💪🏻`;
 
       // Use your existing sendMessage function to send the statsMessage to the channel
       const result = await sendMessage(slackClient, channelId, statsMessage);
@@ -129,4 +130,29 @@ export async function sendFullWeekUpdate(slackClient, channelId) {
   } catch (error) {
     console.error("Error in sendFullWeekUpdate: ", error);
   }
+}
+
+export async function sendMonthlyUpdates() {
+  const channelsData = getActiveChannels(); // Assuming this function returns an array of channel IDs
+  channelsData.forEach(async (channelId) => {
+    const stats = await compileMonthlyStats(channelId); // Assume this function compiles the monthly stats
+
+    if (!stats) {
+      console.log(`No data for channel ${channelId} this month.`);
+      return;
+    }
+
+    const sortedUsers = Object.entries(stats).sort((a, b) => b[1] - a[1]); // Sort users by their total repetitions
+    let message = `Hei superhelter 🚀 Månedens oppsummering er her!\n\n🏆 Månedens topp 3:\n`;
+
+    sortedUsers.slice(0, 3).forEach(([userId, reps], index) => {
+      const medal = ["🥇", "🥈", "🥉"][index];
+      message += `${medal} <@${userId}> med ${reps} repetisjoner\n`;
+    });
+
+    message += `\nFantastisk innsats alle sammen! La oss gjøre neste måned enda bedre! 🚀🎉`;
+
+    // Send the message to the Slack channel
+    await sendMessage(slackClient, channelId, message);
+  });
 }

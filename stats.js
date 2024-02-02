@@ -146,3 +146,49 @@ export async function getNoonStatsMessage(channelId) {
     return "Det oppstod en feil ved henting av dagens statistikk. Vennligst prøv igjen senere.";
   }
 }
+
+/**
+ * Aggregates repetitions for each user over the current month, excluding weekends.
+ * @param {string} channelId - The ID of the Slack channel.
+ * @returns {Object} The total repetitions for each user in the month.
+ */
+export async function compileMonthlyStats(channelId) {
+  const filePath = path.join(insightsDir, `${channelId}.json`);
+
+  // Check if the file for the channel exists
+  if (!fs.existsSync(filePath)) {
+    console.log(`No data file found for channel ${channelId}.`);
+    return null;
+  }
+
+  const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  let monthlyStats = {};
+
+  // Define the start and end of the current month
+  const startOfMonth = moment().startOf("month").format("YYYY-MM-DD");
+  const endOfMonth = moment().endOf("month").format("YYYY-MM-DD");
+
+  // Iterate over each day of the month
+  for (
+    let m = moment(startOfMonth);
+    m.diff(endOfMonth, "days") <= 0;
+    m.add(1, "days")
+  ) {
+    const day = m.format("YYYY-MM-DD");
+
+    // Skip weekends
+    if (m.day() === 6 || m.day() === 0) continue;
+
+    // Check if there's data for the day and aggregate it
+    if (data[day]) {
+      Object.entries(data[day]).forEach(([userId, reps]) => {
+        if (!monthlyStats[userId]) {
+          monthlyStats[userId] = 0;
+        }
+        monthlyStats[userId] += reps;
+      });
+    }
+  }
+
+  return monthlyStats;
+}
