@@ -39,7 +39,7 @@ const {
 // const slackClient = new WebClient(SLACK_BOT_TOKEN);
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 // const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
-const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
+const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET_SPB1);
 
 // Schedule messages
 scheduleMessages(slackClient);
