@@ -111,7 +111,7 @@ slackEvents.on("member_joined_channel", async (event) => {
       await sendMessage(
         slackClient,
         event.channel, // Use the channel ID from the event
-        "Hei! Jeg heter *Treningsboten*! :tada:\nHer kan du forvente daglige treningsøvelser som skal gjennomføres. \nFor hver post, skal det svares i tråden :thread: hvor mange repetisjoner du klarte.\nDet vil komme en oppsummering i løpet av uka, kanskje også underveis i uka om noen står skikkelig på."
+        "Hei! Jeg heter *Treningsboten*! :tada:\n\nHer kan du forvente daglige treningsøvelser som skal gjennomføres. \n\nFor hver post skal det svares i tråden :thread: hvor mange repetisjoner du klarte.\n\nDet vil komme en oppsummering i løpet av uka, kanskje også underveis i uka om noen står skikkelig på."
       );
     } catch (error) {
       ConsoleLogError("Slack events | member_joined_channel | isBot", error);
