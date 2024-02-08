@@ -163,11 +163,9 @@ async function sendNoonMessage(slackClient, channelId) {
 export function scheduleMessages(slackClient) {
   // Oppdater vinneren fra gårsdagen
   cron.schedule(
-    // "10 * * * * 1-5",
-    //"0 1 * * 1-5",
-    "0 16 * * 1-5",
+    "0 1 * * 1-5",
     async () => {
-      console.log("\n1");
+      console.log("\n\n1");
       console.log("Calculating and updating yesterday's winners");
       calculateAndUpdateWinners();
     },
@@ -178,11 +176,9 @@ export function scheduleMessages(slackClient) {
 
   // Sende dagens øvelse m/gårdsdagens vinner
   cron.schedule(
-    // "20 * * * * 1-5",
-    //`${0} ${9} * * 1-5`,
-    "1 16 * * 1-5",
+    "0 9 * * 1-5",
     async () => {
-      console.log("\n2");
+      console.log("\n\n2");
 
       try {
         const activeChannels = getActiveChannels();
@@ -198,42 +194,6 @@ export function scheduleMessages(slackClient) {
       }
     },
     {
-      timezone: "Europe/Oslo",
-    }
-  );
-
-  // Send monthly updates, but run everyday to check if it's the last day of the month
-  cron.schedule(
-    // "50 * * * * 1-5",
-    //"0 0 12 * * *",
-    "4 16 * * 1-5",
-
-    async () => {
-      const today = moment().tz("Europe/Oslo");
-      const lastDayOfMonth = moment(today).endOf("month");
-      const isWeekend = [6, 0].includes(lastDayOfMonth.day());
-
-      if (isWeekend) {
-        console.log("\n\n== Sending monthly updates ==");
-        // If the last day is a weekend, find the previous Friday
-        const lastWeekday = lastDayOfMonth.subtract(
-          lastDayOfMonth.day() === 0 ? 2 : 1,
-          "days"
-        );
-        if (today.isSame(lastWeekday, "day")) {
-          await sendMonthlyUpdates(slackClient); // Your function to send updates
-        }
-      } else if (today.isSame(lastDayOfMonth, "day")) {
-        console.log("\n\n== Sending monthly updates ==");
-        await sendMonthlyUpdates(slackClient); // Your function to send updates
-      } else {
-        console.log("\n\n== Sending monthly updates ==");
-        console.log("\n ETST TEST TEST");
-        await sendMonthlyUpdates(slackClient); // Your function to send updates
-      }
-    },
-    {
-      scheduled: true,
       timezone: "Europe/Oslo",
     }
   );
@@ -262,12 +222,9 @@ export function scheduleMessages(slackClient) {
 
   // Onsdagens halv-uke opdpatering
   cron.schedule(
-    // "30 * * * * 1-5",
-    //"0 0 12 * * 3",
-    "2 16 * * 1-5",
-
+    "0 0 12 * * 3",
     async () => {
-      console.log("\n3");
+      console.log("\n\n3");
 
       try {
         const activeChannels = getActiveChannels();
@@ -292,10 +249,7 @@ export function scheduleMessages(slackClient) {
 
   // Fredag fulluke opdpatering
   cron.schedule(
-    //"0 0 12 * * 5",
-    //    "0 16 * * 1-5",
-    "3 16 * * 1-5",
-
+    "0 0 12 * * 5",
     async () => {
       console.log("\n4");
       try {
@@ -315,6 +269,37 @@ export function scheduleMessages(slackClient) {
       }
     },
     {
+      timezone: "Europe/Oslo",
+    }
+  );
+
+  // Send monthly updates, but run everyday to check if it's the last day of the month
+  cron.schedule(
+    "0 12 * * 1-5",
+    async () => {
+      const today = moment().tz("Europe/Oslo");
+      const lastDayOfMonth = moment(today).endOf("month");
+      const isWeekend = [6, 0].includes(lastDayOfMonth.day());
+
+      if (isWeekend) {
+        console.log("\n\n== Sending monthly updates ==");
+        // If the last day is a weekend, find the previous Friday
+        const lastWeekday = lastDayOfMonth.subtract(
+          lastDayOfMonth.day() === 0 ? 2 : 1,
+          "days"
+        );
+        if (today.isSame(lastWeekday, "day")) {
+          await sendMonthlyUpdates(slackClient); // Your function to send updates
+        }
+      } else if (today.isSame(lastDayOfMonth, "day")) {
+        console.log("\n\n== Sending monthly updates ==");
+        await sendMonthlyUpdates(slackClient); // Your function to send updates
+      } else {
+        return;
+      }
+    },
+    {
+      scheduled: true,
       timezone: "Europe/Oslo",
     }
   );
