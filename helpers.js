@@ -164,7 +164,8 @@ export function scheduleMessages(slackClient) {
   // Oppdater vinneren fra gårsdagen
   cron.schedule(
     // "10 * * * * 1-5",
-    "0 1 * * 1-5",
+    //"0 1 * * 1-5",
+    "0 16 * * 1-5",
     async () => {
       console.log("\n1");
       console.log("Calculating and updating yesterday's winners");
@@ -178,7 +179,8 @@ export function scheduleMessages(slackClient) {
   // Sende dagens øvelse m/gårdsdagens vinner
   cron.schedule(
     // "20 * * * * 1-5",
-    `${0} ${9} * * 1-5`,
+    //`${0} ${9} * * 1-5`,
+    "1 16 * * 1-5",
     async () => {
       console.log("\n2");
 
@@ -203,7 +205,9 @@ export function scheduleMessages(slackClient) {
   // Send monthly updates, but run everyday to check if it's the last day of the month
   cron.schedule(
     // "50 * * * * 1-5",
-    "0 0 12 * * *",
+    //"0 0 12 * * *",
+    "4 16 * * 1-5",
+
     async () => {
       const today = moment().tz("Europe/Oslo");
       const lastDayOfMonth = moment(today).endOf("month");
@@ -259,7 +263,9 @@ export function scheduleMessages(slackClient) {
   // Onsdagens halv-uke opdpatering
   cron.schedule(
     // "30 * * * * 1-5",
-    "0 0 12 * * 3",
+    //"0 0 12 * * 3",
+    "2 16 * * 1-5",
+
     async () => {
       console.log("\n3");
 
@@ -286,8 +292,10 @@ export function scheduleMessages(slackClient) {
 
   // Fredag fulluke opdpatering
   cron.schedule(
-    // "40 * * * * 1-5",
-    "0 0 12 * * 5",
+    //"0 0 12 * * 5",
+    //    "0 16 * * 1-5",
+    "3 16 * * 1-5",
+
     async () => {
       console.log("\n4");
       try {
