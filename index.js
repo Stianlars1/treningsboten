@@ -33,11 +33,10 @@ const PORT_SERVER = 3000;
 const {
   SLACK_SIGNIN_SECRET_SPB1,
   SLACK_BOT_TOKEN_SPB1,
-  SLACK_SIGNIN_SECRET,
-  SLACK_BOT_TOKEN,
+  SLACK_BOT_USER_ID_SPB1,
 } = config; // npr appen skal kjøre på SPB1U
 // const slackClient = new WebClient(SLACK_BOT_TOKEN);
-const slackClient = new WebClient(SLACK_BOT_TOKEN);
+const slackClient = new WebClient(SLACK_BOT_TOKEN_SPB1);
 // const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET);
 const slackEvents = createEventAdapter(SLACK_SIGNIN_SECRET_SPB1);
 
@@ -83,7 +82,7 @@ slackEvents.on("message", async (event) => {
 
 slackEvents.on("member_joined_channel", async (event) => {
   // Check if the member joined is the bot itself
-  const isBot = event.user === config.SLACK_BOT_USER_ID; // todo: bytt til SPB1
+  const isBot = event.user === SLACK_BOT_USER_ID_SPB1; // todo: bytt til SPB1
   console.log("isBot: ", isBot);
   if (isBot) {
     console.log("Bot joined channel: ", event.channel);
