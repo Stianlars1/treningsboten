@@ -61,11 +61,14 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 slackEvents.on("message", async (event) => {
+  const isBot = event.user === SLACK_BOT_USER_ID_SPB1; // todo: bytt til SPB1
+
   /*  == Handle replies in conversation == */
   if (
     event.type === "message" &&
     event.thread_ts &&
-    event.thread_ts !== event.ts
+    event.thread_ts !== event.ts &&
+    !isBot
   ) {
     console.log("Received a reply in a thread:");
 
