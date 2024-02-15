@@ -74,8 +74,23 @@ slackEvents.on("message", async (event) => {
     const threadTimestamp = event.thread_ts;
     const repetitions = parseInt(event.text, 10); // Extracting the number of repetitions from the message text
 
-    if (!isNaN(repetitions)) {
+    // Convert thread timestamp to date string
+    const threadDate = new Date(parseFloat(threadTimestamp) * 1000)
+      .toISOString()
+      .split("T")[0];
+    // Get today's date string
+    const todayDate = new Date().toISOString().split("T")[0];
+
+    if (!isNaN(repetitions) && threadDate === todayDate) {
       updateStatsForThread(channelId, threadTimestamp, userId, repetitions);
+    } else {
+      await slackClient.chat
+        .postMessage({
+          channel: channelId,
+          text: "Ditt svar er notert, men vil ikke bli telt med siden det ble sendt inn for sent.",
+          thread_ts: threadTimestamp,
+        })
+        .catch(console.error);
     }
   }
 });
