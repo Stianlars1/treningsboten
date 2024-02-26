@@ -275,7 +275,7 @@ export function scheduleMessages(slackClient) {
 
   // Send monthly updates, but run everyday to check if it's the last day of the month
   cron.schedule(
-    "0 12 * * 1-5",
+    "30 12 * * 1-5",
     async () => {
       const today = moment().tz("Europe/Oslo");
       const lastDayOfMonth = moment(today).endOf("month");
@@ -289,11 +289,11 @@ export function scheduleMessages(slackClient) {
           "days"
         );
         if (today.isSame(lastWeekday, "day")) {
-          await sendMonthlyUpdates(slackClient); // Your function to send updates
+          await sendMonthlyUpdates(slackClient); // This is sent on a Friday
         }
       } else if (today.isSame(lastDayOfMonth, "day")) {
         console.log("\n\n== Sending monthly updates ==");
-        await sendMonthlyUpdates(slackClient); // Your function to send updates
+        await sendMonthlyUpdates(slackClient); // This sends in the weekdays for last day of month
       } else {
         return;
       }
