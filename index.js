@@ -259,6 +259,10 @@ app.get("/api/channel", async (req, res) => {
     const userInfoData = await JSON.parse(
       fs.readFileSync(userInfoFilePath, "utf8")
     );
+    const userInfoDataMap = Object.keys(userInfoData).map((key) => ({
+      userId: key,
+      ...userInfoData[key],
+    }));
 
     const scoreToday = await summarizeToday(insightsData, userInfoData);
     const monthlySummary = await summarizeMonthly(insightsData, userInfoData);
@@ -270,7 +274,7 @@ app.get("/api/channel", async (req, res) => {
     const channelInsights = {
       monthlySummary: monthlySummary,
       topPerformersAllTime: topPerformersAllTime,
-      usersInfo: userInfoData,
+      usersInfo: userInfoDataMap,
       scoreToday: scoreToday,
     };
 
