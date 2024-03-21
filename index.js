@@ -268,9 +268,6 @@ app.get("/api/channel", async (req, res) => {
       usersInfo: userInfoData,
     };
 
-    console.log("monthlySummary: ", monthlySummary);
-    console.log("topPerformersAllTime: ", topPerformersAllTime);
-    console.log("channelInsights: ", channelInsights);
     console.log(JSON.stringify(channelInsights));
 
     res.json(channelInsights);
