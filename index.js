@@ -5,7 +5,11 @@ import "dotenv/config";
 import express from "express";
 import fs from "fs";
 import path from "path";
-import { findTopPerformers, summarizeMonthly } from "./channelUtils.js";
+import {
+  findTopPerformers,
+  summarizeMonthly,
+  summarizeToday,
+} from "./channelUtils.js";
 import {
   ConsoleLogError,
   UpdateUserInfo,
@@ -256,6 +260,7 @@ app.get("/api/channel", async (req, res) => {
       fs.readFileSync(userInfoFilePath, "utf8")
     );
 
+    const scoreToday = await summarizeToday(insightsData, userInfoData);
     const monthlySummary = await summarizeMonthly(insightsData, userInfoData);
     const topPerformersAllTime = await findTopPerformers(
       insightsData,
@@ -266,6 +271,7 @@ app.get("/api/channel", async (req, res) => {
       monthlySummary: monthlySummary,
       topPerformersAllTime: topPerformersAllTime,
       usersInfo: userInfoData,
+      scoreToday: scoreToday,
     };
 
     console.log(JSON.stringify(channelInsights));
