@@ -1,4 +1,5 @@
 import "dotenv/config";
+
 export const config = {
   // proivate channel for testing
   SLACK_SIGNIN_SECRET: process.env.SLACK_SIGNIN_SECRET,
