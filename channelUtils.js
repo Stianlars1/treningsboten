@@ -52,7 +52,7 @@ export async function findTopPerformers(insightsData, userInfoData) {
       if (userId === "winner") continue; // Skip the 'winner' object
 
       if (!userTotals[userId])
-        userTotals[userId] = { score: 0, user: userInfoData };
+        userTotals[userId] = { score: 0, user: userInfoData[userId] };
       userTotals[userId].score += score;
     }
   }
