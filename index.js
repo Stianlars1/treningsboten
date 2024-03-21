@@ -11,6 +11,7 @@ import {
   activeChannelsFile,
   getActiveChannels,
   initializeDirectoriesAndFiles,
+  insightsDir,
   removeBotFromChannels,
   scheduleMessages,
   sendMessage,
@@ -227,6 +228,24 @@ app.get("/api", (request, response) => {
   } catch (err) {
     console.error("Error: ", err);
     response.status(500).send("Something broke!");
+  }
+});
+
+app.get("/api/channel", (req, res) => {
+  const { channelId, token } = req.query;
+
+  // Example validation (you should replace this with your actual validation logic)
+  if (!validateToken(token)) {
+    return res.status(403).send("Unauthorized");
+  }
+
+  const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
+
+  if (fs.existsSync(insightsFilePath)) {
+    const insightsData = fs.readFileSync(insightsFilePath, "utf8");
+    res.json(JSON.parse(insightsData));
+  } else {
+    res.status(404).send("Channel data not found");
   }
 });
 
