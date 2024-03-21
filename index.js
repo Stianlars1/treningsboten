@@ -203,6 +203,17 @@ app.get("/api", (request, response) => {
                 font-family: Arial, sans-serif;
                 text-align: center;
               }
+              p {
+                max-width: 600px;
+                text-wrap: balance;
+                margin: 0 auto;
+                padding-top: 6rem;
+              }
+
+              a {
+                color: #00b7ff;
+                font-weight: bold;
+              }
             </style>
           </head>
           <body>
@@ -230,3 +241,6 @@ app.listen(PORT_SERVER, () => {
   console.log("Firing up treningsboten server..");
   console.log(`Server listening on port ${PORT_SERVER}`);
 });
+
+
+find . -inum [inode-number] -exec rm {} \
