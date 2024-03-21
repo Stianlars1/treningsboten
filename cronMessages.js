@@ -3,7 +3,7 @@ import moment from "moment-timezone";
 import path from "path";
 import { fileURLToPath } from "url";
 import { getWeekStart, getWeekStartForFriday } from "./dates.js";
-import { getActiveChannels, sendMessage } from "./helpers.js";
+import { ConsoleLogError, getActiveChannels, sendMessage } from "./helpers.js";
 import { compileMonthlyStats } from "./stats.js";
 
 process.env.TZ = "Europe/Oslo";
@@ -166,4 +166,46 @@ export async function sendMonthlyUpdates(slackClient) {
     // Send the message to the Slack channel
     await sendMessage(slackClient, channelId, message);
   });
+}
+
+export async function fetchAndStoreUserInfo(slackClient) {
+  try {
+    const activeChannels = JSON.parse(
+      fs.readFileSync(activeChannelsFile, "utf8")
+    );
+
+    for (const channelId of activeChannels) {
+      // Fetch channel members
+      const membersResponse = await slackClient.conversations.members({
+        channel: channelId,
+      });
+      const memberIds = membersResponse.members;
+
+      const userInfo = {};
+      for (const userId of memberIds) {
+        const userResponse = await slackClient.users.profile.get({
+          user: userId,
+        });
+        const user = userResponse.profile;
+        userInfo[userId] = {
+          name: user.real_name || user.name,
+          displayName: user.display_name || user.display_name_normalized,
+          images: {
+            image_48: user.image_48,
+            image_72: user.image_72,
+            image_192: user.image_192,
+            image_512: user.image_512,
+          },
+        };
+      }
+
+      // Store user info in a JSON file, one per channel for simplicity
+      fs.writeFileSync(
+        path.join(__dirname, `data/userInfo/${channelId}.json`),
+        JSON.stringify(userInfo, null, 2)
+      );
+    }
+  } catch (error) {
+    ConsoleLogError("fetchAndStoreUserInfo", error);
+  }
 }

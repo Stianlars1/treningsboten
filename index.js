@@ -5,8 +5,10 @@ import "dotenv/config";
 import express from "express";
 import fs from "fs";
 import path from "path";
+import { findTopPerformers, summarizeMonthly } from "./channelUtils.js";
 import {
   ConsoleLogError,
+  UpdateUserInfo,
   activeChannelsDir,
   activeChannelsFile,
   getActiveChannels,
@@ -47,6 +49,9 @@ scheduleMessages(slackClient);
 
 // Remove today's blocked food
 removeBotFromChannels(slackClient); // remember to add this
+
+//fetchAndStoreUserInfo(slackClient);
+UpdateUserInfo(slackClient);
 
 // Express and Slack event configurations
 app.use(cors());
@@ -232,7 +237,7 @@ app.get("/api", (request, response) => {
   }
 });
 
-app.get("/api/channel", (req, res) => {
+app.get("/api/channel", async (req, res) => {
   const { channelId, token } = req.query;
 
   // Example validation (you should replace this with your actual validation logic)
@@ -243,8 +248,20 @@ app.get("/api/channel", (req, res) => {
   const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
 
   if (fs.existsSync(insightsFilePath)) {
-    const insightsData = fs.readFileSync(insightsFilePath, "utf8");
-    res.json(JSON.parse(insightsData));
+    const insightsData = await JSON.parse(
+      fs.readFileSync(insightsFilePath, "utf8")
+    );
+    const monthlySummary = await summarizeMonthly(insightsData);
+    const topPerformersAllTime = await findTopPerformers(insightsData);
+    const channelInsights = {
+      monthlySummary: monthlySummary,
+      topPerformersAllTime: topPerformersAllTime,
+    };
+    console.log("monthlySummary: ", monthlySummary);
+    console.log("topPerformersAllTime: ", topPerformersAllTime);
+    console.log("channelInsights: ", channelInsights);
+    console.log(JSON.stringify(channelInsights));
+    res.json(channelInsights);
   } else {
     res.status(404).send("Channel data not found");
   }

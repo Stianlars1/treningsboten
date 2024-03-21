@@ -4,6 +4,7 @@ import cron from "node-cron";
 import path from "path";
 import { fileURLToPath } from "url";
 import {
+  fetchAndStoreUserInfo,
   sendFullWeekUpdate,
   sendHalfWeekUpdate,
   sendMonthlyUpdates,
@@ -17,6 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "data");
 export const activeChannelsDir = path.join(dataDir, "activeChannels");
 export const insightsDir = path.join(dataDir, "insights");
+export const userInfoDir = path.join(dataDir, "userInfo");
 export const activeChannelsFile = path.join(
   activeChannelsDir,
   "activeChannels.json"
@@ -24,7 +26,7 @@ export const activeChannelsFile = path.join(
 
 // Create directories and files if they don't exist
 export function initializeDirectoriesAndFiles() {
-  [dataDir, activeChannelsDir, insightsDir].forEach((dir) => {
+  [dataDir, activeChannelsDir, insightsDir, userInfoDir].forEach((dir) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
@@ -167,7 +169,7 @@ export function scheduleMessages(slackClient) {
     async () => {
       console.log("\n\n1");
       console.log("Calculating and updating yesterday's winners");
-      calculateAndUpdateWinners();
+      await calculateAndUpdateWinners();
     },
     {
       timezone: "Europe/Oslo",
@@ -300,6 +302,24 @@ export function scheduleMessages(slackClient) {
     },
     {
       scheduled: true,
+      timezone: "Europe/Oslo",
+    }
+  );
+}
+export async function UpdateUserInfo(slackClient) {
+  cron.schedule(
+    // time runned
+    // 1:01
+    "1 1 * * 1-5",
+    async () => {
+      console.log("\n\nUpdating user info");
+      try {
+        await fetchAndStoreUserInfo(slackClient);
+      } catch (error) {
+        ConsoleLogError("UpdateUserInfo", error);
+      }
+    },
+    {
       timezone: "Europe/Oslo",
     }
   );
@@ -485,7 +505,7 @@ export async function removeChannel(channelId) {
   });
 }
 
-export function calculateAndUpdateWinners() {
+export async function calculateAndUpdateWinners() {
   console.log("\n\n==== calculateAndUpdateWinners ====");
   try {
     // Correctly read the activeChannels.json file
