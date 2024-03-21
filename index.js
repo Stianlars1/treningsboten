@@ -241,6 +241,3 @@ app.listen(PORT_SERVER, () => {
   console.log("Firing up treningsboten server..");
   console.log(`Server listening on port ${PORT_SERVER}`);
 });
-
-
-find . -inum [inode-number] -exec rm {} \
