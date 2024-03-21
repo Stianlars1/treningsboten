@@ -48,7 +48,7 @@ removeBotFromChannels(slackClient); // remember to add this
 
 // Express and Slack event configurations
 app.use(cors());
-app.use("/slack-events", slackEvents.expressMiddleware());
+app.use("/api/slack-events", slackEvents.expressMiddleware());
 app.use(express.json()); // For parsing application/json
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 
@@ -157,7 +157,7 @@ slackEvents.on("error", (error) => {
 });
 
 // Slack app routes
-app.post("/slack-events", (req, res) => {
+app.post("/api/slack-events", (req, res) => {
   console.log("=== incoming events ===");
   if (req.body.type === "url_verification") {
     return res.send(req.body.challenge);
@@ -187,14 +187,15 @@ app.post("/slack-events", (req, res) => {
 });
 
 // Node.js app routes
-app.get("/", (request, response) => {
-  console.log('Path "/" works ✅🚀');
+app.get("/api", (request, response) => {
+  console.log('Path "/ Api" works ✅🚀');
 
   try {
     const htmlContent = `
         <html>
           <head>
-            <title>Treningsboten</title>
+            <title>Treningsboten API</title>
+            <description>API for treningsboten.com</description>
             <style>
               body {
                 background-color: black;
@@ -205,8 +206,9 @@ app.get("/", (request, response) => {
             </style>
           </head>
           <body>
-            <h1>Welcome to Treningsboten! 🚀✅💥</h1>
-            <p>This site is a web API for treningsboten.com</p>
+            <h1>Welcome to Treningsboten API! 🚀✅💥</h1>
+            <p>This site is a web API for <a href="https://treningsboten.com">treningsboten.com</a></p>
+            <p>For more information, visit the <a href="https://treningsboten.com">treningsboten.com</a> website, or contact me personally by visiting my personal website at <a href="https://stianlarsen.com">stianlarsen.com</a></p>
           </body>
         </html>
       `;
