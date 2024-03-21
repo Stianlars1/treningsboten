@@ -23,6 +23,7 @@ import { validateToken } from "./utils.js";
 import { updateStatsForThread } from "./stats.js";
 
 import { config } from "./config.js";
+import { fetchAndStoreUserInfo } from "./cronMessages.js";
 process.env.TZ = "Europe/Oslo";
 
 // initialize directories and files
@@ -50,7 +51,7 @@ scheduleMessages(slackClient);
 // Remove today's blocked food
 removeBotFromChannels(slackClient); // remember to add this
 
-//fetchAndStoreUserInfo(slackClient);
+fetchAndStoreUserInfo(slackClient);
 UpdateUserInfo(slackClient);
 
 // Express and Slack event configurations
