@@ -16,6 +16,7 @@ import {
   scheduleMessages,
   sendMessage,
 } from "./helpers.js";
+import { validateToken } from "./utils.js";
 
 import { updateStatsForThread } from "./stats.js";
 
