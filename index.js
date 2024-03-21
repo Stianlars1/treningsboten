@@ -17,6 +17,7 @@ import {
   removeBotFromChannels,
   scheduleMessages,
   sendMessage,
+  userInfoDir,
 } from "./helpers.js";
 import { validateToken } from "./utils.js";
 
@@ -245,21 +246,33 @@ app.get("/api/channel", async (req, res) => {
   }
 
   const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
+  const userInfoFilePath = path.join(userInfoDir, `${channelId}.json`);
 
   if (fs.existsSync(insightsFilePath)) {
     const insightsData = await JSON.parse(
       fs.readFileSync(insightsFilePath, "utf8")
     );
-    const monthlySummary = await summarizeMonthly(insightsData);
-    const topPerformersAllTime = await findTopPerformers(insightsData);
+    const userInfoData = await JSON.parse(
+      fs.readFileSync(userInfoFilePath, "utf8")
+    );
+
+    const monthlySummary = await summarizeMonthly(insightsData, userInfoData);
+    const topPerformersAllTime = await findTopPerformers(
+      insightsData,
+      userInfoData
+    );
+
     const channelInsights = {
       monthlySummary: monthlySummary,
       topPerformersAllTime: topPerformersAllTime,
+      usersInfo: userInfoData,
     };
+
     console.log("monthlySummary: ", monthlySummary);
     console.log("topPerformersAllTime: ", topPerformersAllTime);
     console.log("channelInsights: ", channelInsights);
     console.log(JSON.stringify(channelInsights));
+
     res.json(channelInsights);
   } else {
     res.status(404).send("Channel data not found");
