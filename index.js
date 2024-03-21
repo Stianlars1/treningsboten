@@ -59,7 +59,7 @@ UpdateUserInfo(slackClient);
 
 // Express and Slack event configurations
 app.use(cors());
-app.use("/api/slack-events", slackEvents.expressMiddleware());
+app.use("/slack-events", slackEvents.expressMiddleware());
 app.use(express.json()); // For parsing application/json
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 
@@ -169,7 +169,7 @@ slackEvents.on("error", (error) => {
 
 // Slack app routes
 app.post("/api/slack-events", (req, res) => {
-  console.log("=== incoming events ===");
+  console.log("=== incoming events ===", req.body.type);
   if (req.body.type === "url_verification") {
     return res.send(req.body.challenge);
   }
