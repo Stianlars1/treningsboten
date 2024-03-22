@@ -291,6 +291,37 @@ app.get("/api/channel", async (req, res) => {
     res.status(404).send("Channel data not found");
   }
 });
+app.get("/api/auth", async (req, res) => {
+  const { channelId, token } = req.query;
+
+  // Example validation (you should replace this with your actual validation logic)
+  if (!validateToken(token)) {
+    return res.status(403).send("Unauthorized");
+  }
+
+  const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
+  const activeChannelFilePath = path.join(
+    activeChannelsDir,
+    `${channelId}.json`
+  );
+  const filesExists =
+    fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
+
+  if (filesExists) {
+    const channelNameResponse = await slackClient.conversations.info({
+      channel: channelId,
+    });
+    const channelName = channelNameResponse.channel.name;
+    const authResponse = {
+      authentification: true,
+      authToken: channelName,
+    };
+
+    res.status(200).json(authResponse);
+  } else {
+    res.status(404).send("Channel data not found");
+  }
+});
 
 // Error handling
 app.use((err, req, res, next) => {
