@@ -253,6 +253,11 @@ app.get("/api/channel", async (req, res) => {
   const userInfoFilePath = path.join(userInfoDir, `${channelId}.json`);
 
   if (fs.existsSync(insightsFilePath)) {
+    const channelNameResponse = await slackClient.conversations.info({
+      channel: channelId,
+    });
+    const channelName = channelNameResponse.channel.name;
+
     const insightsData = await JSON.parse(
       fs.readFileSync(insightsFilePath, "utf8")
     );
@@ -276,6 +281,7 @@ app.get("/api/channel", async (req, res) => {
       topPerformersAllTime: topPerformersAllTime,
       usersInfo: userInfoDataMap,
       scoreToday: scoreToday,
+      channelName: channelName,
     };
 
     console.log(JSON.stringify(channelInsights));
