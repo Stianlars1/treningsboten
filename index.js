@@ -310,7 +310,10 @@ app.get("/api/auth", async (req, res) => {
 
   console.log(3);
   const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
-  const activeChannelFilePath = path.join(activeChannelsDir, `${channel}.json`);
+  const activeChannelFilePath = path.join(
+    activeChannelsDir,
+    `${channelId}.json`
+  );
 
   const fileExists =
     fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
