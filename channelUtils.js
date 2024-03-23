@@ -60,7 +60,6 @@ export async function summarizeMonthly(insightsData, userInfoData) {
       // Sort the users by score in descending order and take the top 3
       const top3 = Object.entries(users)
         .sort(([, aData], [, bData]) => bData.score - aData.score)
-        .slice(0, 3)
         .map(([userId, { score, user }]) => ({
           userId,
           score,
@@ -92,7 +91,6 @@ export async function findTopPerformers(insightsData, userInfoData) {
   // Convert the aggregated scores to an array, sort it by score in descending order, and take the top 3
   const top3Performers = Object.entries(userTotals)
     .sort(([, aData], [, bData]) => bData.score - aData.score) // Adjusted to access nested score for sorting
-    .slice(0, 3) // Take the top 3
     .map(([userId, { score, user }]) => ({
       userId,
       score,
