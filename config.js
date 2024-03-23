@@ -16,5 +16,3 @@ export const config = {
   ALLOWED_CHANNEL_ALIASES: process.env.ALLOWED_CHANNEL_ALIASES.split(","),
   SLACK_OVERSIKT_CHANNEL: process.env.SLACK_OVERSIKT_CHANNEL,
 };
-
-console.log(config);
