@@ -294,14 +294,23 @@ app.get("/api/channel", async (req, res) => {
 
 app.get("/api/auth", async (req, res) => {
   const { channelId, token } = req.query;
+  console.log("== /api/auth == ");
+  console.log("channelId: ", channelId);
+  console.log("token: ", token);
 
+  console.log(1);
   if (!validateToken(token)) {
+    console.log(2);
     return res.status(403).send("Unauthorized");
   }
 
+  console.log(3);
   const filesExists = isChannelValid(channelId);
+  console.log(filesExists);
+  console.log(4);
 
   if (filesExists) {
+    console.log(5);
     const channelNameResponse = await slackClient.conversations.info({
       channel: channelId,
     });

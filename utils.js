@@ -30,11 +30,18 @@ export const validateChannelAlias = (channel) => {
 
 // check by file or our function validateChannel to validate if the file or function is working as expected
 export const isChannelValid = (channel) => {
+  console.log("## isChannelValid ##");
   const insightsFilePath = path.join(insightsDir, `${channel}.json`);
   const activeChannelFilePath = path.join(activeChannelsDir, `${channel}.json`);
+  console.log("#### paths\n: ", insightsFilePath, activeChannelFilePath);
+
   const fileExists =
     fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
   const doChannelExist = validateChannelAlias(channel);
-
+  console.log(
+    "#### fileExists, doChannelExist\n: ",
+    fileExists,
+    doChannelExist
+  );
   return fileExists || doChannelExist;
 };
