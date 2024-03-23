@@ -246,107 +246,111 @@ app.get("/api", (request, response) => {
 });
 
 app.get("/api/channel", async (req, res) => {
-  const { channelId, token } = req.query;
+  console.log("== /api/channel == ");
+  try {
+    const { channelId, token } = req.query;
 
-  // Example validation (you should replace this with your actual validation logic)
-  if (!validateToken(token)) {
-    return res.status(403).send("Unauthorized");
-  }
+    // Example validation (you should replace this with your actual validation logic)
+    if (!validateToken(token)) {
+      return res.status(403).send("Unauthorized");
+    }
 
-  const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
-  const userInfoFilePath = path.join(userInfoDir, `${channelId}.json`);
+    const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
+    const userInfoFilePath = path.join(userInfoDir, `${channelId}.json`);
 
-  if (fs.existsSync(insightsFilePath)) {
-    const channelNameResponse = await slackClient.conversations.info({
-      channel: channelId,
-    });
-    const channelName = channelNameResponse.channel.name;
+    if (fs.existsSync(insightsFilePath)) {
+      const channelNameResponse = await slackClient.conversations.info({
+        channel: channelId,
+      });
+      const channelName = channelNameResponse.channel.name;
 
-    const insightsData = await JSON.parse(
-      fs.readFileSync(insightsFilePath, "utf8")
-    );
-    const userInfoData = await JSON.parse(
-      fs.readFileSync(userInfoFilePath, "utf8")
-    );
-    const userInfoDataMap = Object.keys(userInfoData).map((key) => ({
-      userId: key,
-      ...userInfoData[key],
-    }));
+      const insightsData = await JSON.parse(
+        fs.readFileSync(insightsFilePath, "utf8")
+      );
+      const userInfoData = await JSON.parse(
+        fs.readFileSync(userInfoFilePath, "utf8")
+      );
+      const userInfoDataMap = Object.keys(userInfoData).map((key) => ({
+        userId: key,
+        ...userInfoData[key],
+      }));
 
-    const scoreToday = await summarizeToday(insightsData, userInfoData);
-    const monthlySummary = await summarizeMonthly(insightsData, userInfoData);
-    const topPerformersAllTime = await findTopPerformers(
-      insightsData,
-      userInfoData
-    );
+      const scoreToday = await summarizeToday(insightsData, userInfoData);
+      const monthlySummary = await summarizeMonthly(insightsData, userInfoData);
+      const topPerformersAllTime = await findTopPerformers(
+        insightsData,
+        userInfoData
+      );
 
-    const channelInsights = {
-      monthlySummary: monthlySummary,
-      topPerformersAllTime: topPerformersAllTime,
-      usersInfo: userInfoDataMap,
-      scoreToday: scoreToday,
-      channelName: channelName,
-    };
+      const channelInsights = {
+        monthlySummary: monthlySummary,
+        topPerformersAllTime: topPerformersAllTime,
+        usersInfo: userInfoDataMap,
+        scoreToday: scoreToday,
+        channelName: channelName,
+      };
 
-    console.log(JSON.stringify(channelInsights));
+      console.log(JSON.stringify(channelInsights));
 
-    res.json(channelInsights);
-  } else {
-    res.status(404).send("Channel data not found");
+      res.json(channelInsights);
+    } else {
+      res.status(404).send("Channel data not found");
+    }
+  } catch (error) {
+    ConsoleLogError("GET /api/channel", error);
+    // internal server error or something
+    res.status(500).send("Something broke!");
   }
 });
 
 app.get("/api/auth", async (req, res) => {
-  const { channelId, token } = req.query;
-  console.log("== /api/auth == ");
-  console.log("channelId: ", channelId);
-  console.log("token: ", token);
+  try {
+    const { channelId, token } = req.query;
+    console.log("== /api/auth == ");
 
-  console.log(1);
-  if (!validateToken(token)) {
-    console.log(2);
-    return res.status(403).send("Unauthorized");
-  }
+    if (!validateToken(token)) {
+      console.log(2);
+      return res.status(403).send("Unauthorized");
+    }
 
-  console.log(3);
-  const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
-  const activeChannelFilePath = path.join(
-    activeChannelsDir,
-    `${channelId}.json`
-  );
+    console.log(3);
+    const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
+    const activeChannelFilePath = path.join(
+      activeChannelsDir,
+      `${channelId}.json`
+    );
 
-  const fileExists =
-    fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
-  const doChannelExist = validateChannelAlias(channelId);
+    const fileExists =
+      fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
+    const doChannelExist = validateChannelAlias(channelId);
 
-  console.log("fileExists: ", fileExists);
-  console.log("doChannelExist: ", doChannelExist);
+    const isValid = fileExists || doChannelExist;
+    if (isValid) {
+      const channelIdToUse = fileExists
+        ? channelId
+        : await mapTeamToChannel(channelId);
+      const channelNameResponse = await slackClient.conversations.info({
+        channel: channelIdToUse,
+      });
+      const channelName = channelNameResponse.channel.name;
+      const authResponse = {
+        authentification: true,
+        authToken: channelName,
+      };
 
-  const isValid = fileExists || doChannelExist;
-  console.log("isValid: ", isValid);
-  if (isValid) {
-    const channelIdToUse = fileExists
-      ? channelId
-      : await mapTeamToChannel(channelId);
-    console.log("channelIdToUse", channelIdToUse);
-    const channelNameResponse = await slackClient.conversations.info({
-      channel: channelIdToUse,
-    });
-    const channelName = channelNameResponse.channel.name;
-    const authResponse = {
-      authentification: true,
-      authToken: channelName,
-    };
-
-    res.status(200).json(authResponse);
-  } else {
-    res.status(404).send("No channel by that name found");
+      res.status(200).json(authResponse);
+    } else {
+      res.status(404).send("No channel by that name found");
+    }
+  } catch (error) {
+    ConsoleLogError("GET /api/auth", error);
+    res.status(500).send("Something broke!");
   }
 });
 
 // Error handling
 app.use((err, req, res, next) => {
-  console.error("An error occurred: \n", err.stack);
+  console.error("== An error occurred == \n", err.stack);
   res.status(500).send("Something broke!");
 });
 
