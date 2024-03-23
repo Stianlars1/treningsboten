@@ -319,11 +319,16 @@ app.get("/api/auth", async (req, res) => {
     fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
   const doChannelExist = validateChannelAlias(channelId);
 
+  console.log("fileExists: ", fileExists);
+  console.log("doChannelExist: ", doChannelExist);
+
   const isValid = fileExists || doChannelExist;
+  console.log("isValid: ", isValid);
   if (isValid) {
     const channelIdToUse = fileExists
       ? channelId
       : await mapTeamToChannel(channelId);
+    console.log("channelIdToUse", channelIdToUse);
     const channelNameResponse = await slackClient.conversations.info({
       channel: channelIdToUse,
     });
