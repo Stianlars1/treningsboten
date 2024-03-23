@@ -57,8 +57,13 @@ export const mapTeamToChannel = async (channel) => {
   const parsedFile = await JSON.parse(
     fs.readFileSync(mapTeamToChannelFile, "utf8")
   );
+  const formattedChannel = channel
+    .trim()
+    .replace(" ", "")
+    .replace("-", "")
+    .toLowerCase();
   const channelName = Object.keys(parsedFile).find(
-    (key) => key.toLowerCase() === channel.toLowerCase()
+    (key) => key.toLowerCase() === formattedChannel
   );
   const channelId = parsedFile[channelName];
 
