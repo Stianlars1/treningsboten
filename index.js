@@ -335,7 +335,9 @@ app.get("/api/auth", async (req, res) => {
       const channelName = channelNameResponse.channel.name;
       const authResponse = {
         authentification: true,
-        authToken: channelName,
+        authToken: channelIdToUse,
+        channelName: channelName,
+        channelId: channelIdToUse,
       };
 
       res.status(200).json(authResponse);
