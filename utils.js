@@ -6,9 +6,16 @@ import { fileURLToPath } from "url";
 process.env.TZ = "Europe/Oslo";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// directories
 const dataDir = path.join(__dirname, "data");
 const activeChannelsDir = path.join(dataDir, "activeChannels");
 const insightsDir = path.join(dataDir, "insights");
+
+// files
+const mapTeamToChannelFile = path.join(
+  activeChannelsDir,
+  `mapTeamToChannel.json`
+);
 
 export const validateToken = (token) => {
   const formattedToken = token
@@ -44,4 +51,15 @@ export const isChannelValid = (channel) => {
     doChannelExist
   );
   return fileExists || doChannelExist;
+};
+
+export const mapTeamToChannel = async (channel) => {
+  const parsedFile = await JSON.parse(
+    fs.readFileSync(mapTeamToChannelFile, "utf8")
+  );
+  const channelId = Object.keys(parsedFile).find(
+    (key) => key.toLowerCase() === channel.toLowerCase()
+  );
+
+  return channelId;
 };

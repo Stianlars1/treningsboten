@@ -23,7 +23,11 @@ import {
   sendMessage,
   userInfoDir,
 } from "./helpers.js";
-import { isChannelValid, validateToken } from "./utils.js";
+import {
+  mapTeamToChannel,
+  validateChannelAlias,
+  validateToken,
+} from "./utils.js";
 
 import { updateStatsForThread } from "./stats.js";
 
@@ -305,14 +309,20 @@ app.get("/api/auth", async (req, res) => {
   }
 
   console.log(3);
-  const filesExists = isChannelValid(channelId);
-  console.log(filesExists);
-  console.log(4);
+  const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
+  const activeChannelFilePath = path.join(activeChannelsDir, `${channel}.json`);
 
-  if (filesExists) {
-    console.log(5);
+  const fileExists =
+    fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
+  const doChannelExist = validateChannelAlias(channelId);
+
+  const isValid = fileExists || doChannelExist;
+  if (isValid) {
+    const channelIdToUse = fileExists
+      ? channelId
+      : await mapTeamToChannel(channelId);
     const channelNameResponse = await slackClient.conversations.info({
-      channel: channelId,
+      channel: channelIdToUse,
     });
     const channelName = channelNameResponse.channel.name;
     const authResponse = {
