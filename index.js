@@ -23,7 +23,7 @@ import {
   sendMessage,
   userInfoDir,
 } from "./helpers.js";
-import { validateToken } from "./utils.js";
+import { isChannelValid, validateToken } from "./utils.js";
 
 import { updateStatsForThread } from "./stats.js";
 
@@ -291,21 +291,15 @@ app.get("/api/channel", async (req, res) => {
     res.status(404).send("Channel data not found");
   }
 });
+
 app.get("/api/auth", async (req, res) => {
   const { channelId, token } = req.query;
 
-  // Example validation (you should replace this with your actual validation logic)
   if (!validateToken(token)) {
     return res.status(403).send("Unauthorized");
   }
 
-  const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
-  const activeChannelFilePath = path.join(
-    activeChannelsDir,
-    `${channelId}.json`
-  );
-  const filesExists =
-    fs.existsSync(insightsFilePath) || fs.existsSync(activeChannelFilePath);
+  const filesExists = isChannelValid(channelId);
 
   if (filesExists) {
     const channelNameResponse = await slackClient.conversations.info({
@@ -319,7 +313,7 @@ app.get("/api/auth", async (req, res) => {
 
     res.status(200).json(authResponse);
   } else {
-    res.status(404).send("Channel data not found");
+    res.status(404).send("No channel by that name found");
   }
 });
 
