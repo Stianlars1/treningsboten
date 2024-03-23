@@ -13,4 +13,7 @@ export const config = {
   SLACK_BOT_USER_ID_SPB1: process.env.SLACK_BOT_USER_ID_SPB1,
   SLACK_OVERSIKT_CHANNEL_ID_SPB1: process.env.SLACK_OVERSIKT_CHANNEL_ID_SPB1,
   ALLOWED_USERS: process.env.ALLOWED_USERS.split(","),
+  ALLOWED_CHANNEL_ALIASES: process.env.ALLOWED_CHANNEL_ALIASES.split(","),
 };
+
+console.log(config);
