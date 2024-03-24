@@ -122,7 +122,7 @@ export async function thisWeeksScore(insightsData, userInfoData) {
       // Ensure we have an object for the user and add the score
       userTotals[userId] = userTotals[userId] || {
         score: 0,
-        user: userInfoData[userId] || {},
+        ...(userInfoData[userId] || undefined),
       };
       userTotals[userId].score += score;
     }
@@ -155,7 +155,7 @@ export async function getYesterdaysWinner(insightsData, userInfoData) {
   const yesterdaysWinner = Object.keys(winner).map((userId) => ({
     userId,
     score: winner[userId],
-    user: userInfoData[userId] || {},
+    ...(userInfoData[userId] || undefined),
   }));
 
   return yesterdaysWinner;
