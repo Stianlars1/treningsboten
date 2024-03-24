@@ -99,3 +99,35 @@ export async function findTopPerformers(insightsData, userInfoData) {
 
   return top3Performers;
 }
+
+export async function thisWeeksScores(insightsData, userInfoData) {
+  const userTotals = {};
+
+  // Get the current week's number
+  const currentWeek = getWeekNumber(new Date());
+
+  // Aggregate scores for each user in the current week
+  for (const [date, dailyResults] of Object.entries(insightsData)) {
+    const week = getWeekNumber(new Date(date));
+    if (week !== currentWeek) continue; // Skip data from other weeks
+
+    for (const [userId, score] of Object.entries(dailyResults)) {
+      if (userId === "winner") continue; // Skip the 'winner' object
+
+      if (!userTotals[userId])
+        userTotals[userId] = { score: 0, user: userInfoData[userId] };
+      userTotals[userId].score += score;
+    }
+  }
+
+  // Convert the aggregated scores to an array, sort it by score in descending order, and take the top 3
+  const thisWeeksScore = Object.entries(userTotals)
+    .sort(([, aData], [, bData]) => bData.score - aData.score) // Adjusted to access nested score for sorting
+    .map(([userId, { score, user }]) => ({
+      userId,
+      score,
+      ...user,
+    }));
+
+  return thisWeeksScore;
+}

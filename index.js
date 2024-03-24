@@ -276,6 +276,7 @@ app.get("/api/channel", async (req, res) => {
       }));
 
       const scoreToday = await summarizeToday(insightsData, userInfoData);
+      const scoreThisWeek = await thisWeeksScores(insightsData, userInfoData);
       const monthlySummary = await summarizeMonthly(insightsData, userInfoData);
       const topPerformersAllTime = await findTopPerformers(
         insightsData,
@@ -283,14 +284,13 @@ app.get("/api/channel", async (req, res) => {
       );
 
       const channelInsights = {
+        channelName: channelName,
+        scoreToday: scoreToday,
+        scoreThisWeek: scoreThisWeek,
         monthlySummary: monthlySummary,
         topPerformersAllTime: topPerformersAllTime,
         usersInfo: userInfoDataMap,
-        scoreToday: scoreToday,
-        channelName: channelName,
       };
-
-      console.log(JSON.stringify(channelInsights));
 
       res.json(channelInsights);
     } else {
@@ -309,11 +309,9 @@ app.get("/api/auth", async (req, res) => {
     console.log("== /api/auth == ");
 
     if (!validateToken(token)) {
-      console.log(2);
       return res.status(403).send("Unauthorized");
     }
 
-    console.log(3);
     const insightsFilePath = path.join(insightsDir, `${channelId}.json`);
     const activeChannelFilePath = path.join(
       activeChannelsDir,
