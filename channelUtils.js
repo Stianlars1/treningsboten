@@ -1,3 +1,5 @@
+import moment from "moment-timezone";
+
 export async function summarizeToday(insightsData, userInfoData) {
   const scoreToday = {};
   const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
@@ -100,34 +102,62 @@ export async function findTopPerformers(insightsData, userInfoData) {
   return top3Performers;
 }
 
-export async function thisWeeksScores(insightsData, userInfoData) {
+export async function thisWeeksScore(insightsData, userInfoData) {
   const userTotals = {};
+  // Moment.js to get start of the week (Monday) and today
+  const startOfWeek = moment().tz("Europe/Oslo").startOf("isoWeek");
+  const today = moment().tz("Europe/Oslo");
 
-  // Get the current week's number
-  const currentWeek = getWeekNumber(new Date());
-
-  // Aggregate scores for each user in the current week
+  // Aggregate scores for each user from the start of the week to today
   for (const [date, dailyResults] of Object.entries(insightsData)) {
-    const week = getWeekNumber(new Date(date));
-    if (week !== currentWeek) continue; // Skip data from other weeks
+    const currentDate = moment(date);
+    // Check if the date is within this week's range
+    if (currentDate.isBefore(startOfWeek) || currentDate.isAfter(today)) {
+      continue; // Skip data not in the range from this week's Monday to today
+    }
 
     for (const [userId, score] of Object.entries(dailyResults)) {
       if (userId === "winner") continue; // Skip the 'winner' object
 
-      if (!userTotals[userId])
-        userTotals[userId] = { score: 0, user: userInfoData[userId] };
+      // Ensure we have an object for the user and add the score
+      userTotals[userId] = userTotals[userId] || {
+        score: 0,
+        user: userInfoData[userId] || {},
+      };
       userTotals[userId].score += score;
     }
   }
 
-  // Convert the aggregated scores to an array, sort it by score in descending order, and take the top 3
+  // Convert the aggregated scores to an array, sort it by score in descending order, and return
   const thisWeeksScore = Object.entries(userTotals)
-    .sort(([, aData], [, bData]) => bData.score - aData.score) // Adjusted to access nested score for sorting
     .map(([userId, { score, user }]) => ({
       userId,
       score,
       ...user,
-    }));
+    }))
+    .sort((a, b) => b.score - a.score); // Sort after mapping to keep the user data
 
   return thisWeeksScore;
+}
+export async function getYesterdaysWinner(insightsData, userInfoData) {
+  const yesterday = moment()
+    .tz("Europe/Oslo")
+    .subtract(1, "days")
+    .format("YYYY-MM-DD");
+
+  console.log("## yesterday: ", yesterday);
+  const dailyResults = insightsData[yesterday] || undefined;
+
+  if (!dailyResults) {
+    return undefined;
+  }
+
+  const winner = dailyResults.winner || dailyResults["winner"];
+  const yesterdaysWinner = Object.keys(winner).map((userId) => ({
+    userId,
+    score: winner[userId],
+    user: userInfoData[userId] || {},
+  }));
+
+  return yesterdaysWinner;
 }

@@ -7,8 +7,10 @@ import fs from "fs";
 import path from "path";
 import {
   findTopPerformers,
+  getYesterdaysWinner,
   summarizeMonthly,
   summarizeToday,
+  thisWeeksScore,
 } from "./channelUtils.js";
 import {
   ConsoleLogError,
@@ -275,8 +277,12 @@ app.get("/api/channel", async (req, res) => {
         ...userInfoData[key],
       }));
 
+      const winnerYesterday = await getYesterdaysWinner(
+        insightsData,
+        userInfoData
+      );
       const scoreToday = await summarizeToday(insightsData, userInfoData);
-      const scoreThisWeek = await thisWeeksScores(insightsData, userInfoData);
+      const scoreThisWeek = await thisWeeksScore(insightsData, userInfoData);
       const monthlySummary = await summarizeMonthly(insightsData, userInfoData);
       const topPerformersAllTime = await findTopPerformers(
         insightsData,
@@ -285,6 +291,7 @@ app.get("/api/channel", async (req, res) => {
 
       const channelInsights = {
         channelName: channelName,
+        winnerYesterday: winnerYesterday || null,
         scoreToday: scoreToday,
         scoreThisWeek: scoreThisWeek,
         monthlySummary: monthlySummary,
