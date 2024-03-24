@@ -7,7 +7,7 @@ export async function summarizeToday(insightsData, userInfoData) {
   // Check if there's data for today
   const dailyResults = insightsData[today];
   if (!dailyResults) {
-    return {}; // Return an empty object if there's no data for today
+    return null; // Return an empty object if there's no data for today
   }
 
   // Iterate through today's scores, excluding the 'winner' key
