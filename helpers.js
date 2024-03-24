@@ -102,20 +102,16 @@ async function getDailyExerciseMessage(channelId) {
 
   // Use moment-timezone to get "today" and "yesterday" in Norwegian time zone
   const today = moment.tz("Europe/Oslo").format("YYYY-MM-DD");
-  console.log("today: ", today);
   const yesterdayDate = moment
     .tz("Europe/Oslo")
     .subtract(1, "days")
     .format("YYYY-MM-DD");
-  console.log("yesterday: ", yesterdayDate);
 
   const filePath = path.join(insightsDir, `${channelId}.json`);
   let message = trainingExercise;
 
   if (fs.existsSync(filePath)) {
-    console.log("file exists");
     const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    console.log("data: ", data);
     if (data[yesterdayDate] && data[yesterdayDate].winner) {
       const winner = Object.keys(data[yesterdayDate].winner)[0];
       const reps = data[yesterdayDate].winner[winner];
@@ -380,10 +376,8 @@ async function fetchSlackChannels(slackClient) {
       types: "public_channel,private_channel",
       cursor: cursor,
     });
-    console.log("response: ", response);
     response.channels.forEach((channel) => {
       if (channel.is_member) {
-        console.log("pushing channel: ", channel);
         channels.push(channel.id);
       }
     });

@@ -145,7 +145,6 @@ export async function getYesterdaysWinner(insightsData, userInfoData) {
     .subtract(1, "days")
     .format("YYYY-MM-DD");
 
-  console.log("## yesterday: ", yesterday);
   const dailyResults = insightsData[yesterday] || undefined;
 
   if (!dailyResults) {
